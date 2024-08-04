@@ -1,5 +1,5 @@
 [versions]
-agp = "8.7.0-alpha01"
+agp = "8.5.1"
 kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -13,10 +13,13 @@ ktor = "2.3.12"
 kotlinx-coroutines = "1.8.1"
 kotlinx-serialization = "1.7.1"
 lifecycle = "2.8.4"
+pagingRuntime = "3.3.1"
 
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingRuntime" }
+androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "pagingRuntime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

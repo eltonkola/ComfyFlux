@@ -1,5 +1,6 @@
 package com.eltonkola.comfyflux.app
 
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.Bitmap
 import androidx.compose.foundation.Image
@@ -12,6 +13,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import android.graphics.BitmapFactory
 import android.os.Environment
+import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -21,15 +23,20 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.eltonkola.comfyflux.R
+import com.eltonkola.comfyflux.app.prompts.PromptSearch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -52,7 +59,10 @@ fun FluxAPIApp(
     Box(  modifier = Modifier.fillMaxSize()) {
 
         if (uiState.image != null) {
-            Box(modifier = Modifier.fillMaxSize()) {
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.BottomEnd
+            ) {
                 Image(
                     bitmap = uiState.image!!.asImageBitmap(),
                     contentDescription = null,
@@ -71,11 +81,42 @@ fun FluxAPIApp(
 
         } else {
 
+            var showDialog by remember { mutableStateOf(false) }
 
             Column(
                 modifier = modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
+
+                IconButton(
+                    onClick = { showDialog = true }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = "Prompts"
+                    )
+                }
+
+                if(showDialog){
+                    AlertDialog(
+                        onDismissRequest = { showDialog = false },
+                        title = { Text("Prompt ideas") },
+                        text = {
+                            PromptSearch{
+                                viewModel.updatePrompt(it)
+                                showDialog = false
+                            }
+                        },
+                        confirmButton = {
+                            Button(onClick = { showDialog = false }) {
+                                Text("OK")
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    )
+                }
 
                 TextField(
                     value = uiState.server,
@@ -149,7 +190,7 @@ fun FluxAPIApp(
 fun ImageGrid(images: Map<String, List<ByteArray>>, onZoom: (Bitmap) -> Unit) {
     val context = LocalContext.current
     LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 128.dp),
+        columns = GridCells.Adaptive(minSize = 160.dp),
         contentPadding = PaddingValues(4.dp)
     ) {
         for ((nodeId, imageList) in images) {
@@ -168,17 +209,19 @@ fun ImageGrid(images: Map<String, List<ByteArray>>, onZoom: (Bitmap) -> Unit) {
                     Box(
                         modifier = Modifier
                             .padding(4.dp)
-                            .size(128.dp)
+                            .size(160.dp),
+                        contentAlignment = Alignment.BottomEnd
                     ) {
                         Image(
                             bitmap = it.asImageBitmap(),
                             contentDescription = "Generated image from node $nodeId",
                             modifier = Modifier
-                                .fillMaxSize()
+                                .fillMaxSize(),
+                            contentScale = ContentScale.Crop
                         )
                         Row(
                             modifier = Modifier
-                                .align(Alignment.TopEnd)
+                                .align(Alignment.BottomEnd)
                                 .padding(8.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
@@ -207,18 +250,28 @@ fun ImageGrid(images: Map<String, List<ByteArray>>, onZoom: (Bitmap) -> Unit) {
 }
 
 
-
 fun saveImageToDownloads(context: Context, bitmap: Bitmap, filename: String) {
-    val directory = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES)
-    val file = File(directory, filename)
+    val resolver = context.contentResolver
+    val contentValues = ContentValues().apply {
+        put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/${context.getString(R.string.app_name)}")
+    }
 
     try {
-        FileOutputStream(file).use { outputStream ->
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-            outputStream.flush()
+        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+        uri?.let {
+            resolver.openOutputStream(it)?.use { outputStream ->
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+                outputStream.flush()
+                Toast.makeText(context, "Image saved to Pictures", Toast.LENGTH_SHORT).show()
+            } ?: run {
+                Toast.makeText(context, "Failed to open output stream", Toast.LENGTH_SHORT).show()
+            }
+        } ?: run {
+            Toast.makeText(context, "Failed to insert image", Toast.LENGTH_SHORT).show()
         }
-        Toast.makeText(context, "Image saved to downloads", Toast.LENGTH_SHORT).show()
-    } catch (e: IOException) {
+    } catch (e: Exception) {
         e.printStackTrace()
         Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
     }

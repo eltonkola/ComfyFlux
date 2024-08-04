@@ -2,9 +2,11 @@ package com.eltonkola.comfyflux.app
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.eltonkola.comfyflux.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +14,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.InputStream
+import java.nio.charset.Charset
 
 data class ImageGenerationUiState(
     val prompt: String = "a cat with a hat",
@@ -65,7 +69,16 @@ class ImageGenerationViewModel(
 
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-                val prompt = flexWorkflow(_uiState.value.prompt)
+
+                val promptRaw = context.resources.openRawResource(R.raw.flux_api)
+
+                var prompt = promptRaw.readTextAndClose()
+                prompt = prompt.replace("__prompt__", uiState.value.prompt)
+                prompt = prompt.replace("__clientId__", fluxAPI.clientId)
+
+
+                Log.d("FluxApp", "prompt: $prompt")
+
                 val result = withContext(Dispatchers.IO) {
                     fluxAPI.getImages(prompt)
                 }
@@ -78,4 +91,8 @@ class ImageGenerationViewModel(
     }
 
 
+}
+
+fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String {
+    return this.bufferedReader(charset).use { it.readText() }
 }

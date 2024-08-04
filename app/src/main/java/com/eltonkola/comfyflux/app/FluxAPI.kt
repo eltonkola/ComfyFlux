@@ -89,18 +89,17 @@ data class QueueStatus(
 val DEFAULT_URL = "192.168.0.2:8188"
 
 class FluxAPI {
-    private val clientId = UUID.randomUUID().toString()
+
+    val clientId = UUID.randomUUID().toString()
+
     private val client = HttpClient(CIO) {
         install(WebSockets)
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
-
             })
         }
     }
-
-
 
     private var serverAddress = DEFAULT_URL
 
