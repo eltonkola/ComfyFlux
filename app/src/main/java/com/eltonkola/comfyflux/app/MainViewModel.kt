@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.eltonkola.comfyflux.R
 import com.eltonkola.comfyflux.app.model.SystemStats
+import com.eltonkola.comfyflux.app.netwrok.DEFAULT_URL
+import com.eltonkola.comfyflux.app.netwrok.FluxAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

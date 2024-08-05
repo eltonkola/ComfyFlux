@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app
+package com.eltonkola.comfyflux.app.netwrok
 
 import android.util.Log
 import com.eltonkola.comfyflux.app.model.SystemStats
@@ -19,14 +19,12 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.decodeFromJsonElement
 import java.util.UUID
 
@@ -88,7 +86,12 @@ data class QueueStatus(
 )
 
 
-val DEFAULT_URL = "192.168.0.2:8188"
+const val DEFAULT_URL = "192.168.0.2:8188"
+
+/*
+Api docs:
+https://github.com/comfyanonymous/ComfyUI/issues/2110
+*/
 
 class FluxAPI {
 

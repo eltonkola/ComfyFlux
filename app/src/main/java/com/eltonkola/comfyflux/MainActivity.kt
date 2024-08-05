@@ -17,9 +17,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ComfyFluxTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MainAppScreen(modifier = Modifier.padding(innerPadding))
-                }
+                MainAppScreen()
             }
         }
     }
