@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.eltonkola.comfyflux.R
+import com.eltonkola.comfyflux.app.model.SystemStats
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,20 +24,23 @@ data class ImageGenerationUiState(
     val images: Map<String, List<ByteArray>> = emptyMap(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val image: Bitmap? = null
+    val image: Bitmap? = null,
+
+    val loadingStats: Boolean = false,
+    val stats: SystemStats? = null
 )
 
 class ImageGenerationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ImageGenerationViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return ImageGenerationViewModel(context) as T
+            return MainViewModel(context) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 
-class ImageGenerationViewModel(
+class MainViewModel(
     private val context: Context,
     private val fluxAPI: FluxAPI = FluxAPI()
 ) : ViewModel() {
@@ -44,6 +48,9 @@ class ImageGenerationViewModel(
     private val _uiState = MutableStateFlow(ImageGenerationUiState())
     val uiState: StateFlow<ImageGenerationUiState> = _uiState.asStateFlow()
 
+    init {
+        checkStatus()
+    }
 
     fun updateSeverUrl(url: String){
         viewModelScope.launch {
@@ -90,6 +97,15 @@ class ImageGenerationViewModel(
         }
     }
 
+    fun checkStatus(){
+        _uiState.update { it.copy(loadingStats = true, stats = null) }
+        viewModelScope.launch {
+            val status = fluxAPI.checkSystemStats()
+            _uiState.update { it.copy(loadingStats = false, stats = status) }
+
+        }
+
+    }
 
 }
 

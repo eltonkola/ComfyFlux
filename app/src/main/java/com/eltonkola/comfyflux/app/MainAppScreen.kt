@@ -12,10 +12,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import android.graphics.BitmapFactory
-import android.os.Environment
 import android.provider.MediaStore
 import android.widget.Toast
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.text.KeyboardActions
@@ -39,14 +37,11 @@ import com.eltonkola.comfyflux.R
 import com.eltonkola.comfyflux.app.prompts.PromptSearch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
 
 @Composable
-fun FluxAPIApp(
+fun MainAppScreen(
     modifier: Modifier,
-    viewModel: ImageGenerationViewModel = viewModel(
+    viewModel: MainViewModel = viewModel(
         factory = ImageGenerationViewModelFactory(LocalContext.current.applicationContext)
     )
 
@@ -54,7 +49,6 @@ fun FluxAPIApp(
     val uiState by viewModel.uiState.collectAsState()
 
     val keyboardController = LocalSoftwareKeyboardController.current
-    val context = LocalContext.current
 
     Box(  modifier = Modifier.fillMaxSize()) {
 
@@ -118,22 +112,8 @@ fun FluxAPIApp(
                     )
                 }
 
-                TextField(
-                    value = uiState.server,
-                    onValueChange = { newText -> viewModel.updateSeverUrl(newText) },
-                    label = { Text("Server IP and Port") },
-                    placeholder = { Text("e.g., 192.168.1.1:8080") },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            keyboardController?.hide()
-                        }
-                    )
-                )
 
+                ServerConnectionUi(viewModel = viewModel, uiState = uiState)
 
                 Spacer(modifier = Modifier.height(16.dp))
                 TextField(

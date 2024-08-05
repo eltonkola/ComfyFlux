@@ -1,6 +1,7 @@
 package com.eltonkola.comfyflux.app
 
 import android.util.Log
+import com.eltonkola.comfyflux.app.model.SystemStats
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -18,6 +19,7 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.Serializable
@@ -108,7 +110,7 @@ class FluxAPI {
     }
 
     suspend fun queuePrompt(prompt: String): String {
-       // val jsonString = Json.encodeToString(prompt)
+        // val jsonString = Json.encodeToString(prompt)
         Log.d("FluxAPI", "Sending prompt: $prompt")
         val response = client.post("http://$serverAddress/prompt") {
             contentType(ContentType.Application.Json)
@@ -202,5 +204,21 @@ class FluxAPI {
         return outputImages
     }
 
+    suspend fun checkSystemStats(): SystemStats? {
+        Log.d("FluxAPI", "call checkSystemStats")
+        return try {
+            val response = client.get("http://$serverAddress/system_stats") {
+                contentType(ContentType.Application.Json)
+            }
+            val responseBody = response.bodyAsText()
+            Log.d("FluxAPI", "Received response: $responseBody")
+            val stats = Json.decodeFromString<SystemStats>(responseBody)
+            Log.d("FluxAPI", "call checkSystemStats stats: $stats")
+            stats
+        } catch (e: Exception) {
+            e.printStackTrace()
+            null
+        }
+    }
 
 }

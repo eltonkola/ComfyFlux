@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
-import com.eltonkola.comfyflux.app.FluxAPIApp
+import com.eltonkola.comfyflux.app.MainAppScreen
 import com.eltonkola.comfyflux.ui.theme.ComfyFluxTheme
 
 class MainActivity : ComponentActivity() {
@@ -18,7 +18,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ComfyFluxTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    FluxAPIApp(modifier = Modifier.padding(innerPadding))
+                    MainAppScreen(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
