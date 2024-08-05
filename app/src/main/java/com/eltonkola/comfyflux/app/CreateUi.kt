@@ -7,6 +7,8 @@ import android.graphics.BitmapFactory
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -21,18 +23,23 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.rounded.List
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -43,6 +50,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
@@ -56,7 +65,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun CreateUi(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
+fun CreateUi(uiState: ImageGenerationUiState, viewModel: MainViewModel, openWorkflows:() -> Unit) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -67,6 +76,39 @@ fun CreateUi(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
 
         ServerConnectionUi(viewModel = viewModel, uiState = uiState)
         Spacer(modifier = Modifier.height(16.dp))
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.fillMaxWidth()) {
+            Icon(
+                modifier = Modifier.size(64.dp),
+                imageVector = Icons.Default.MailOutline,
+                contentDescription = null
+            )
+            Column (
+                modifier = Modifier.weight(1f)
+            ){
+                Text(
+                    text = uiState.workflow.name,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = uiState.workflow.description,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+            Icon(
+                modifier = Modifier.size(24.dp).clickable {
+                    openWorkflows()
+                },
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = null)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+
         TextField(
             value = uiState.prompt,
             onValueChange = { newText -> viewModel.updatePrompt(newText) },

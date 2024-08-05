@@ -125,7 +125,13 @@ fun MainAppScreen(
                                     viewModel.setCurrentImage(null)
                                 }
                             } else {
-                                CreateUi(uiState, viewModel)
+                                CreateUi(uiState, viewModel){
+                                    scope.launch {
+                                        drawerStateLeft.apply {
+                                            if (isClosed) open() else close()
+                                        }
+                                    }
+                                }
                             }
                         } else {
                             Text(text = "Please make sure your server in online, and in the same network, to be able to use this app.\nRemember, this us just a minimal front ent for simple flows.")
@@ -143,7 +149,17 @@ fun MainAppScreen(
                     }
                 },
                 leftContent = {
-                    Text(text = "TODO - select prompt!")
+                    WorkflowsUi(
+                        uiState = uiState,
+                        onSelect = {
+                            viewModel.updateWorkflow(it)
+                            scope.launch {
+                                drawerStateLeft.apply {
+                                    if (!isClosed) close()
+                                }
+                            }
+                        }
+                    )
                 }
             )
         }

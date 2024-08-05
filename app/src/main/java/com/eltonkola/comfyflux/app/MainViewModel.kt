@@ -8,6 +8,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.eltonkola.comfyflux.R
 import com.eltonkola.comfyflux.app.model.SystemStats
+import com.eltonkola.comfyflux.app.model.Workflow
+import com.eltonkola.comfyflux.app.model.workflows
 import com.eltonkola.comfyflux.app.netwrok.DEFAULT_URL
 import com.eltonkola.comfyflux.app.netwrok.FluxAPI
 import kotlinx.coroutines.Dispatchers
@@ -29,7 +31,8 @@ data class ImageGenerationUiState(
     val image: Bitmap? = null,
 
     val loadingStats: Boolean = false,
-    val stats: SystemStats? = null
+    val stats: SystemStats? = null,
+    val workflow: Workflow = workflows.first()
 )
 
 class ImageGenerationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
@@ -67,6 +70,13 @@ class MainViewModel(
         }
     }
 
+    fun updateWorkflow(workflow: Workflow){
+        viewModelScope.launch {
+            _uiState.update { it.copy(workflow = workflow) }
+        }
+    }
+
+
     fun setCurrentImage(image: Bitmap?){
         viewModelScope.launch {
             _uiState.update { it.copy(image = image) }
@@ -79,11 +89,7 @@ class MainViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
 
-                val promptRaw = context.resources.openRawResource(R.raw.flux_api)
-
-                var prompt = promptRaw.readTextAndClose()
-                prompt = prompt.replace("__prompt__", uiState.value.prompt)
-                prompt = prompt.replace("__clientId__", fluxAPI.clientId)
+                val prompt = loadWorkflow()
 
 
                 Log.d("FluxApp", "prompt: $prompt")
@@ -107,6 +113,20 @@ class MainViewModel(
 
         }
 
+    }
+
+    private fun loadWorkflow() : String {
+        val workflow = _uiState.value.workflow
+        val promptRaw = context.resources.openRawResource(workflow.workflowRes)
+        var prompt = promptRaw.readTextAndClose()
+        prompt = prompt.replace("__prompt__", uiState.value.prompt)
+
+        return """
+{
+  "client_id": "$fluxAPI.clientId",
+  "prompt": $prompt
+}  
+        """.trimIndent()
     }
 
 }

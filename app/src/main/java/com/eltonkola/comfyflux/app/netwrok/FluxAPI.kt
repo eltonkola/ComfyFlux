@@ -90,7 +90,11 @@ const val DEFAULT_URL = "192.168.0.2:8188"
 
 /*
 Api docs:
+Rest:
 https://github.com/comfyanonymous/ComfyUI/issues/2110
+
+WS:
+https://github.com/comfyanonymous/ComfyUI/issues/2258
 */
 
 class FluxAPI {
