@@ -44,6 +44,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.ArrowDown
 import com.eltonkola.comfyflux.ui.theme.ikona.Clean
@@ -59,7 +60,8 @@ import com.eltonkola.comfyflux.ui.theme.ikona.Workflow
 fun CreateUi(
     uiState: ImageGenerationUiState,
     viewModel: MainViewModel,
-    openWorkflows: () -> Unit,
+    navController: NavController,
+    openWorkflows: () -> Unit
 ) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -72,100 +74,107 @@ fun CreateUi(
         ServerConnectionUi(viewModel = viewModel, uiState = uiState)
         Spacer(modifier = Modifier.height(16.dp))
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 8.dp, end = 8.dp)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(6.dp)
-                )
-                .clip(RoundedCornerShape(6.dp))
-                .clickable {
-                    openWorkflows()
-                }
-                .padding(8.dp)
-        ) {
+        if (uiState.stats == null) {
+            Text(text = "Please make sure your server in online, and in the same network, to be able to use this app.\nRemember, this us just a minimal front ent for simple flows.")
 
-            Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = Ikona.Workflow,
-                contentDescription = null
-            )
+        } else {
 
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = uiState.workflow.name,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-            }
-            Icon(
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier
-                    .size(24.dp),
-                imageVector = Ikona.ArrowDown,
-                contentDescription = null
-            )
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .aspectRatio(1.8f)
-                .background(MaterialTheme.colorScheme.secondary)
-            ,
-            contentAlignment = Alignment.Center
-        ) {
+                    .fillMaxWidth()
+                    .padding(start = 8.dp, end = 8.dp)
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.primary,
+                        shape = RoundedCornerShape(6.dp)
+                    )
+                    .clip(RoundedCornerShape(6.dp))
+                    .clickable {
+                        openWorkflows()
+                    }
+                    .padding(8.dp)
+            ) {
 
-            if (uiState.images.isNotEmpty()) {
-                ImageGrid(images = uiState.images) {
-                    viewModel.setCurrentImage(it)
-                }
-            } else {
                 Icon(
-                    imageVector = Ikona.Image,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondary
+                    modifier = Modifier.size(24.dp),
+                    imageVector = Ikona.Workflow,
+                    contentDescription = null
+                )
+
+                Column(
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Text(
+                        text = uiState.workflow.name,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                Icon(
+                    modifier = Modifier
+                        .size(24.dp),
+                    imageVector = Ikona.ArrowDown,
+                    contentDescription = null
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.8f)
+                    .background(MaterialTheme.colorScheme.secondary),
+                contentAlignment = Alignment.Center
+            ) {
 
-            if(uiState.isLoading) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(64.dp)
-                )
-            }
-        }
+                if (uiState.images.isNotEmpty()) {
+                    ImageGrid(images = uiState.images) {
+                        viewModel.setCurrentImage(it)
+                        navController.navigate(AppScreens.ImageViewer.screenName)
+                    }
+                } else {
+                    Icon(
+                        imageVector = Ikona.Image,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondary
+                    )
+                }
 
-        var tabIndex by remember { mutableIntStateOf(0) }
-
-        val tabs = listOf("Prompt", "Size", "More")
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            TabRow(selectedTabIndex = tabIndex) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(text = { Text(title) },
-                        selected = tabIndex == index,
-                        onClick = { tabIndex = index }
+                if (uiState.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(64.dp)
                     )
                 }
             }
-            when (tabIndex) {
-                0 -> PromptTab(uiState, viewModel)
-                1 -> SizeTab(uiState, viewModel)
-                2 -> MoreTab(uiState, viewModel)
+
+            var tabIndex by remember { mutableIntStateOf(0) }
+
+            val tabs = listOf("Prompt", "Size", "More")
+
+            Column(modifier = Modifier.fillMaxWidth()) {
+                TabRow(selectedTabIndex = tabIndex) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(text = { Text(title) },
+                            selected = tabIndex == index,
+                            onClick = { tabIndex = index }
+                        )
+                    }
+                }
+                when (tabIndex) {
+                    0 -> PromptTab(uiState, viewModel)
+                    1 -> SizeTab(uiState, viewModel)
+                    2 -> MoreTab(uiState, viewModel)
+                }
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (uiState.error != null) {
+                Text("Error: ${uiState.error}")
+            }
+
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (uiState.error != null) {
-            Text("Error: ${uiState.error}")
-        }
-
     }
 }
 

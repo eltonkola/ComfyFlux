@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.eltonkola.comfyflux.app.data.PromptRepo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,9 +30,11 @@ class PromptsViewModel(application: Application) : AndroidViewModel(application)
             Pager(
                 config = PagingConfig(pageSize = 50),
                 pagingSourceFactory = { repository.getPagingSource(query) }
-            ).flow.collectLatest {
+            ).flow.cachedIn(viewModelScope).collectLatest {
                 _pagingDataFlow.value = it
             }
+
+
         }
     }
 }
