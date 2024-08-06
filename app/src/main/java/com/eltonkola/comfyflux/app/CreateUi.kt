@@ -7,6 +7,7 @@ import android.graphics.BitmapFactory
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -15,20 +16,25 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Menu
@@ -40,11 +46,15 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -65,7 +75,11 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @Composable
-fun CreateUi(uiState: ImageGenerationUiState, viewModel: MainViewModel, openWorkflows:() -> Unit) {
+fun CreateUi(uiState: ImageGenerationUiState,
+             viewModel: MainViewModel,
+             openWorkflows:() -> Unit,
+             openHistory:() -> Unit,
+             ) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -80,12 +94,8 @@ fun CreateUi(uiState: ImageGenerationUiState, viewModel: MainViewModel, openWork
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.fillMaxWidth()) {
-            Icon(
-                modifier = Modifier.size(64.dp),
-                imageVector = Icons.Default.MailOutline,
-                contentDescription = null
-            )
+            modifier = Modifier.fillMaxWidth().padding(8.dp)
+        ) {
             Column (
                 modifier = Modifier.weight(1f)
             ){
@@ -93,22 +103,108 @@ fun CreateUi(uiState: ImageGenerationUiState, viewModel: MainViewModel, openWork
                     text = uiState.workflow.name,
                     style = MaterialTheme.typography.bodyMedium
                 )
-                Text(
-                    text = uiState.workflow.description,
-                    style = MaterialTheme.typography.bodySmall
-                )
             }
             Icon(
-                modifier = Modifier.size(24.dp).clickable {
-                    openWorkflows()
-                },
+                modifier = Modifier
+                    .size(24.dp)
+                    .clickable {
+                        openWorkflows()
+                    },
                 imageVector = Icons.Default.ArrowDropDown,
                 contentDescription = null)
         }
         Spacer(modifier = Modifier.height(16.dp))
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .aspectRatio(1.8f),
+            contentAlignment = Alignment.Center
+            ){
+
+            if (uiState.images.isNotEmpty()) {
+                ImageGrid(images = uiState.images) {
+                    viewModel.setCurrentImage(it)
+                }
+            }else{
+                Icon(imageVector = Icons.Default.DateRange, contentDescription = null)
+            }
+        }
+
+        var tabIndex by remember { mutableIntStateOf(0) }
+
+        val tabs = listOf("Prompt", "Size", "More")
+
+        Column(modifier = Modifier.fillMaxWidth()) {
+            TabRow(selectedTabIndex = tabIndex) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(text = { Text(title) },
+                        selected = tabIndex == index,
+                        onClick = { tabIndex = index }
+                    )
+                }
+            }
+            when (tabIndex) {
+                0 -> PromptTab(uiState, viewModel)
+                1 -> SizeTab(uiState, viewModel)
+                2 -> MoreTab(uiState, viewModel)
+            }
+        }
 
 
 
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            Button(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                onClick = {
+                    viewModel.generateImages()
+                    keyboardController?.hide()
+                },
+                enabled = !uiState.isLoading
+            ) {
+                Text(if (uiState.isLoading) "Loading..." else "Generate Images")
+            }
+        }
+
+
+        if (uiState.error != null) {
+            Text("Error: ${uiState.error}")
+        }
+
+
+
+        Spacer(modifier = Modifier
+            .fillMaxWidth()
+            .weight(1f))
+
+        Button(
+            modifier = Modifier,
+            onClick = {
+                openHistory()
+            },
+            enabled = true
+        ) {
+            Text("Show History")
+        }
+
+    }
+}
+
+@Composable
+fun PromptTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ){
         TextField(
             value = uiState.prompt,
             onValueChange = { newText -> viewModel.updatePrompt(newText) },
@@ -174,133 +270,116 @@ fun CreateUi(uiState: ImageGenerationUiState, viewModel: MainViewModel, openWork
                 }
             }
         )
-
-        Row {
-
-
-        }
-
-
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Button(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                onClick = {
-                    viewModel.generateImages()
-                    keyboardController?.hide()
-                },
-                enabled = !uiState.isLoading
-            ) {
-                Text(if (uiState.isLoading) "Loading..." else "Generate Images")
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        if (uiState.error != null) {
-            Text("Error: ${uiState.error}")
-        }
-
-        if (uiState.images.isNotEmpty()) {
-            ImageGrid(images = uiState.images) {
-                viewModel.setCurrentImage(it)
-            }
-        }
     }
 }
 
 
 @Composable
-fun ImageGrid(images: Map<String, List<ByteArray>>, onZoom: (Bitmap) -> Unit) {
-    val context = LocalContext.current
-    LazyVerticalGrid(
-        columns = GridCells.Adaptive(minSize = 160.dp),
-        contentPadding = PaddingValues(4.dp)
+fun SizeTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
     ) {
-        for ((nodeId, imageList) in images) {
-            items(imageList.size) { index ->
-                val imageData = imageList[index]
-                var bitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
+        ImageSizeSelector(uiState = uiState, viewModel = viewModel)
+        Spacer(modifier = Modifier.height(16.dp))
 
-                LaunchedEffect(imageData) {
-                    bitmap = withContext(Dispatchers.Default) {
-                        BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
-                    }
-                }
+        ImageBatchSelector(uiState = uiState, viewModel = viewModel)
+        Spacer(modifier = Modifier.height(16.dp))
 
-                bitmap?.let {
-
-                    Box(
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .size(160.dp),
-                        contentAlignment = Alignment.BottomEnd
-                    ) {
-                        Image(
-                            bitmap = it.asImageBitmap(),
-                            contentDescription = "Generated image from node $nodeId",
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            contentScale = ContentScale.Crop
-                        )
-                        Row(
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            IconButton (
-                                onClick = { saveImageToDownloads(context, it, "flux_image_${System.currentTimeMillis()}.png") }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Send,
-                                    contentDescription = "Download"
-                                )
-                            }
-                            IconButton(
-                                onClick = { onZoom(it) }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = "Zoom"
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 }
 
 
-fun saveImageToDownloads(context: Context, bitmap: Bitmap, filename: String) {
-    val resolver = context.contentResolver
-    val contentValues = ContentValues().apply {
-        put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/${context.getString(R.string.app_name)}")
-    }
+@Composable
+fun MoreTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
 
-    try {
-        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-        uri?.let {
-            resolver.openOutputStream(it)?.use { outputStream ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                outputStream.flush()
-                Toast.makeText(context, "Image saved to Pictures", Toast.LENGTH_SHORT).show()
-            } ?: run {
-                Toast.makeText(context, "Failed to open output stream", Toast.LENGTH_SHORT).show()
-            }
-        } ?: run {
-            Toast.makeText(context, "Failed to insert image", Toast.LENGTH_SHORT).show()
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
     }
 }
+
+
+@Composable
+fun ImageSizeSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
+    val imageSizes = listOf(256, 320, 384, 448, 512, 576, 640, 704, 768, 832, 896, 960, 1024)
+    val sliderValues = List(imageSizes.size) { index -> index.toFloat() }
+
+    var widthIndex by remember { mutableIntStateOf(imageSizes.indexOf(uiState.width)) }
+    var heightIndex by remember { mutableIntStateOf(imageSizes.indexOf(uiState.height)) }
+
+    Row(
+        modifier = Modifier.padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 6.dp)
+        ) {
+            Text(text = "Width: ${imageSizes[widthIndex]}Px")
+            Slider(
+                value = widthIndex.toFloat(),
+                valueRange = sliderValues.first()..sliderValues.last(),
+                onValueChange = {
+                    widthIndex = it.toInt()
+                    viewModel.setImageWidth(imageSizes[widthIndex])
+                },
+                steps = sliderValues.size
+            )
+
+            Text(text = "Height: ${imageSizes[heightIndex]}Px")
+            Slider(
+                value = heightIndex.toFloat(),
+                valueRange = sliderValues.first()..sliderValues.last(),
+                onValueChange = {
+                    heightIndex = it.toInt()
+                    viewModel.setImageHeight(imageSizes[heightIndex])
+                },
+                steps = sliderValues.size
+            )
+        }
+
+        Box(
+            modifier = Modifier
+                .width(120.dp)
+                .aspectRatio(imageSizes[widthIndex].toFloat() / imageSizes[heightIndex].toFloat())
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center
+        ){
+            Text(text = "${imageSizes[widthIndex]}x${imageSizes[heightIndex]}Px")
+        }
+
+
+
+    }
+}
+
+
+@Composable
+fun ImageBatchSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
+    var imageBatch by remember { mutableIntStateOf(uiState.batchSize) }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(6.dp)
+        ) {
+            Text(text = "How many images do you want to generate: $imageBatch")
+            Slider(
+                value = imageBatch.toFloat(),
+                valueRange = 1F..32F,
+                onValueChange = {
+                    imageBatch= it.toInt()
+                    viewModel.setBatchSize(imageBatch)
+                },
+                steps = 32
+            )
+        }
+}
+

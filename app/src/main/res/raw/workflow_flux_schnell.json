@@ -1,9 +1,9 @@
 {
   "5": {
     "inputs": {
-      "width": 512,
-      "height": 512,
-      "batch_size": 1
+      "width": __width__,
+      "height": __height__,
+      "batch_size": __batch_size__
     },
     "class_type": "EmptyLatentImage",
     "_meta": {

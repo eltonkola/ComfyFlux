@@ -32,7 +32,10 @@ data class ImageGenerationUiState(
 
     val loadingStats: Boolean = false,
     val stats: SystemStats? = null,
-    val workflow: Workflow = workflows.first()
+    val workflow: Workflow = workflows.first(),
+    val width: Int = 512,
+    val height: Int = 512,
+    val batchSize: Int = 1
 )
 
 class ImageGenerationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
@@ -83,6 +86,24 @@ class MainViewModel(
         }
     }
 
+    fun setImageWidth(width: Int){
+        viewModelScope.launch {
+            _uiState.update { it.copy(width = width) }
+        }
+    }
+
+    fun setImageHeight(height: Int){
+        viewModelScope.launch {
+            _uiState.update { it.copy(height = height) }
+        }
+    }
+
+    fun setBatchSize(batchSize: Int){
+        viewModelScope.launch {
+            _uiState.update { it.copy(batchSize = batchSize) }
+        }
+    }
+
     fun generateImages() {
         viewModelScope.launch {
 
@@ -106,7 +127,7 @@ class MainViewModel(
     }
 
     fun checkStatus(){
-        _uiState.update { it.copy(loadingStats = true, stats = null) }
+        _uiState.update { it.copy(loadingStats = true) }
         viewModelScope.launch {
             val status = fluxAPI.checkSystemStats()
             _uiState.update { it.copy(loadingStats = false, stats = status) }
@@ -120,13 +141,14 @@ class MainViewModel(
         val promptRaw = context.resources.openRawResource(workflow.workflowRes)
         var prompt = promptRaw.readTextAndClose()
         prompt = prompt.replace("__prompt__", uiState.value.prompt)
+        prompt = prompt.replace("__width__", uiState.value.width.toString())
+        prompt = prompt.replace("__height__", uiState.value.height.toString())
+        prompt = prompt.replace("__batch_size__", uiState.value.batchSize.toString())
 
-        return """
-{
-  "client_id": "$fluxAPI.clientId",
+        return """{
+  "client_id": "${fluxAPI.clientId}",
   "prompt": $prompt
-}  
-        """.trimIndent()
+}""".trimIndent()
     }
 
 }

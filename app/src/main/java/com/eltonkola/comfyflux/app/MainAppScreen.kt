@@ -3,9 +3,12 @@ package com.eltonkola.comfyflux.app
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
@@ -20,6 +23,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
@@ -32,11 +36,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eltonkola.comfyflux.app.prompts.PromptSearch
 import kotlinx.coroutines.launch
@@ -60,15 +66,6 @@ fun MainAppScreen(
     val drawerStateRight = rememberDrawerState(initialValue = DrawerValue.Closed)
 
     Scaffold(
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                text = { Text("Show History") },
-                icon = { Icon(Icons.Filled.Add, contentDescription = "") },
-                onClick = {
-                    showBottomSheet = true
-                }
-            )
-        },
         topBar = {
             TopAppBar(
                 navigationIcon = {
@@ -125,13 +122,18 @@ fun MainAppScreen(
                                     viewModel.setCurrentImage(null)
                                 }
                             } else {
-                                CreateUi(uiState, viewModel){
-                                    scope.launch {
-                                        drawerStateLeft.apply {
-                                            if (isClosed) open() else close()
+                                CreateUi(uiState, viewModel,
+                                    {
+                                        scope.launch {
+                                            drawerStateLeft.apply {
+                                                if (isClosed) open() else close()
+                                            }
                                         }
+                                    },
+                                    {
+                                        showBottomSheet = true
                                     }
-                                }
+                                )
                             }
                         } else {
                             Text(text = "Please make sure your server in online, and in the same network, to be able to use this app.\nRemember, this us just a minimal front ent for simple flows.")
@@ -165,8 +167,6 @@ fun MainAppScreen(
         }
 
 
-
-
         if (showBottomSheet) {
             ModalBottomSheet(
                 onDismissRequest = {
@@ -187,3 +187,4 @@ fun MainAppScreen(
     }
 
 }
+
