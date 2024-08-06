@@ -12,6 +12,7 @@ import com.eltonkola.comfyflux.app.model.Workflow
 import com.eltonkola.comfyflux.app.model.workflows
 import com.eltonkola.comfyflux.app.netwrok.DEFAULT_URL
 import com.eltonkola.comfyflux.app.netwrok.FluxAPI
+import com.eltonkola.comfyflux.app.netwrok.GroqAPI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -53,7 +54,8 @@ class ImageGenerationViewModelFactory(private val context: Context) : ViewModelP
 
 class MainViewModel(
     private val context: Context,
-    private val fluxAPI: FluxAPI = FluxAPI()
+    private val fluxAPI: FluxAPI = FluxAPI(),
+    private val groqAPI: GroqAPI = GroqAPI()
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ImageGenerationUiState())
@@ -135,6 +137,18 @@ class MainViewModel(
         }
     }
 
+    fun enrichPrompt(){
+        viewModelScope.launch {
+            try{
+                val richPrompt = groqAPI.enrichPrompt(uiState.value.prompt)
+                _uiState.update { it.copy(prompt = richPrompt) }
+
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
+        }
+    }
+
     fun checkStatus(){
         _uiState.update { it.copy(loadingStats = true) }
         viewModelScope.launch {
@@ -156,7 +170,7 @@ class MainViewModel(
         } else {
             uiState.value.seed
         }
-        prompt = prompt.replace("__prompt__", uiState.value.prompt)
+        prompt = prompt.replace("__prompt__", uiState.value.prompt.cleanPrompt())
         prompt = prompt.replace("__width__", uiState.value.width.toString())
         prompt = prompt.replace("__height__", uiState.value.height.toString())
         prompt = prompt.replace("__batch_size__", uiState.value.batchSize.toString())
@@ -183,3 +197,11 @@ fun generateRandom16DigitNumber(): Long {
     return random
 }
 
+fun String.cleanPrompt() : String {
+    return this
+        .replace("\\", "\\\\") // Escape backslashes
+        .replace("\"", "\\\"") // Escape double quotes
+        .replace("\n", "") // Remove newlines
+        .replace("\r", "") // Remove carriage returns
+        .replace("\t", "") // Remove tabs
+}

@@ -1,9 +1,23 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
 }
+
+fun Project.loadProperties(): Properties {
+    val properties = Properties()
+    file("../local.properties").inputStream().use { properties.load(it) }
+    return properties
+}
+
+fun Project.apiKey(): String {
+    val properties = loadProperties()
+    return properties.getProperty("GROQ_API_KEY") ?: System.getenv("GROQ_API_KEY") ?: ""
+}
+
 
 android {
     namespace = "com.eltonkola.comfyflux"
@@ -17,7 +31,10 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+
     }
+
 
     buildTypes {
         release {
@@ -26,6 +43,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "GROQ_API_KEY", "\"${project.apiKey()}\"")
+        }
+        debug{
+            buildConfigField("String", "GROQ_API_KEY", "\"${project.apiKey()}\"")
+
         }
     }
     compileOptions {
@@ -37,6 +59,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

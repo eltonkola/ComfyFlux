@@ -115,7 +115,9 @@ fun CreateUi(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(1.8f),
+                .aspectRatio(1.8f)
+                .background(MaterialTheme.colorScheme.secondary)
+            ,
             contentAlignment = Alignment.Center
         ) {
 
@@ -124,11 +126,17 @@ fun CreateUi(
                     viewModel.setCurrentImage(it)
                 }
             } else {
-                if(uiState.isLoading) {
-                    CircularProgressIndicator(modifier = Modifier.size(64.dp))
-                }else{
-                    Icon(imageVector = Ikona.Image, contentDescription = null)
-                }
+                Icon(
+                    imageVector = Ikona.Image,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSecondary
+                )
+            }
+
+            if(uiState.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(64.dp)
+                )
             }
         }
 
@@ -216,7 +224,9 @@ fun PromptTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
                     val clipboard = LocalClipboardManager.current
 
                     IconButton(
-                        onClick = { }
+                        onClick = {
+                            viewModel.enrichPrompt()
+                        }
                     ) {
                         Icon(
                             imageVector = Ikona.Magic,
