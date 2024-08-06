@@ -1,48 +1,28 @@
 package com.eltonkola.comfyflux.app
 
-import android.content.ContentValues
-import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.provider.MediaStore
-import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material.icons.rounded.List
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,33 +32,35 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.eltonkola.comfyflux.R
-import com.eltonkola.comfyflux.app.prompts.PromptSearch
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import com.eltonkola.comfyflux.ui.theme.Ikona
+import com.eltonkola.comfyflux.ui.theme.ikona.ArrowDown
+import com.eltonkola.comfyflux.ui.theme.ikona.Clean
+import com.eltonkola.comfyflux.ui.theme.ikona.Image
+import com.eltonkola.comfyflux.ui.theme.ikona.Magic
+import com.eltonkola.comfyflux.ui.theme.ikona.Paste
+import com.eltonkola.comfyflux.ui.theme.ikona.Promp
+import com.eltonkola.comfyflux.ui.theme.ikona.Refresh
+import com.eltonkola.comfyflux.ui.theme.ikona.Seed
+import com.eltonkola.comfyflux.ui.theme.ikona.Workflow
 
 @Composable
-fun CreateUi(uiState: ImageGenerationUiState,
-             viewModel: MainViewModel,
-             openWorkflows:() -> Unit,
-             ) {
+fun CreateUi(
+    uiState: ImageGenerationUiState,
+    viewModel: MainViewModel,
+    openWorkflows: () -> Unit,
+) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -93,11 +75,30 @@ fun CreateUi(uiState: ImageGenerationUiState,
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp),
-            modifier = Modifier.fillMaxWidth().padding(8.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 8.dp, end = 8.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(6.dp)
+                )
+                .clip(RoundedCornerShape(6.dp))
+                .clickable {
+                    openWorkflows()
+                }
+                .padding(8.dp)
         ) {
-            Column (
+
+            Icon(
+                modifier = Modifier.size(24.dp),
+                imageVector = Ikona.Workflow,
+                contentDescription = null
+            )
+
+            Column(
                 modifier = Modifier.weight(1f)
-            ){
+            ) {
                 Text(
                     text = uiState.workflow.name,
                     style = MaterialTheme.typography.bodyMedium
@@ -105,26 +106,29 @@ fun CreateUi(uiState: ImageGenerationUiState,
             }
             Icon(
                 modifier = Modifier
-                    .size(24.dp)
-                    .clickable {
-                        openWorkflows()
-                    },
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = null)
+                    .size(24.dp),
+                imageVector = Ikona.ArrowDown,
+                contentDescription = null
+            )
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Box(modifier = Modifier
-            .fillMaxWidth()
-            .aspectRatio(1.8f),
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1.8f),
             contentAlignment = Alignment.Center
-            ){
+        ) {
 
             if (uiState.images.isNotEmpty()) {
                 ImageGrid(images = uiState.images) {
                     viewModel.setCurrentImage(it)
                 }
-            }else{
-                Icon(imageVector = Icons.Default.DateRange, contentDescription = null)
+            } else {
+                if(uiState.isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(64.dp))
+                }else{
+                    Icon(imageVector = Ikona.Image, contentDescription = null)
+                }
             }
         }
 
@@ -165,7 +169,7 @@ fun PromptTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
-    ){
+    ) {
         TextField(
             value = uiState.prompt,
             onValueChange = { newText -> viewModel.updatePrompt(newText) },
@@ -174,7 +178,7 @@ fun PromptTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(150.dp), // Adjust height as needed
-            maxLines = 6,
+            minLines = 6,
             singleLine = false,
             keyboardOptions = KeyboardOptions.Default.copy(
                 imeAction = ImeAction.Done
@@ -196,8 +200,7 @@ fun PromptTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
                 ) {
                     Icon(
                         modifier = Modifier.size(24.dp),
-                        imageVector = Icons.Rounded.List,
-                        tint = Color.Black,
+                        imageVector = Ikona.Promp,
                         contentDescription = null
                     )
                 }
@@ -209,23 +212,40 @@ fun PromptTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
                         .fillMaxHeight()
                         .padding(4.dp)
                 ) {
+
+                    val clipboard = LocalClipboardManager.current
+
                     IconButton(
                         onClick = { }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Prompts"
+                            imageVector = Ikona.Magic,
+                            contentDescription = "Ai generate prompt",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
-
+                    IconButton(
+                        onClick = {
+                            clipboard.getText()?.let{
+                                viewModel.updatePrompt(uiState.prompt + it)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Ikona.Paste,
+                            contentDescription = "paste",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                     IconButton(
                         onClick = {
                             viewModel.updatePrompt("")
                         }
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear"
+                            imageVector = Ikona.Clean,
+                            contentDescription = "Clear",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 }
@@ -243,10 +263,6 @@ fun SizeTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
             .verticalScroll(rememberScrollState())
     ) {
         ImageSizeSelector(uiState = uiState, viewModel = viewModel)
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ImageBatchSelector(uiState = uiState, viewModel = viewModel)
-        Spacer(modifier = Modifier.height(16.dp))
 
     }
 }
@@ -259,6 +275,12 @@ fun MoreTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
     ) {
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ImageBatchSelector(uiState = uiState, viewModel = viewModel)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        SeedSelector(uiState = uiState, viewModel = viewModel)
 
     }
 }
@@ -304,19 +326,22 @@ fun ImageSizeSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel)
                 steps = sliderValues.size
             )
         }
-
-        Box(
-            modifier = Modifier
-                .width(120.dp)
-                .aspectRatio(imageSizes[widthIndex].toFloat() / imageSizes[heightIndex].toFloat())
-                .clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
-        ){
-            Text(text = "${imageSizes[widthIndex]}x${imageSizes[heightIndex]}Px")
+        Box(modifier = Modifier.size(120.dp, 120.dp)) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize(1f)
+                    .defaultMinSize(40.dp, 40.dp)
+                    .aspectRatio(imageSizes[widthIndex].toFloat() / imageSizes[heightIndex].toFloat())
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${imageSizes[widthIndex]}x${imageSizes[heightIndex]}Px",
+                    color = MaterialTheme.colorScheme.onPrimary
+                    )
+            }
         }
-
-
 
     }
 }
@@ -326,21 +351,86 @@ fun ImageSizeSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel)
 fun ImageBatchSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
     var imageBatch by remember { mutableIntStateOf(uiState.batchSize) }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(6.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(6.dp)
+    ) {
+        Text(
+            text = "Image Batch",
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Text(text = "How many images do you want to generate: $imageBatch")
+        Slider(
+            value = imageBatch.toFloat(),
+            valueRange = 1F..32F,
+            onValueChange = {
+                imageBatch = it.toInt()
+                viewModel.setBatchSize(imageBatch)
+            },
+            steps = 32
+        )
+    }
+}
+
+
+@Composable
+fun SeedSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(6.dp)
+    ) {
+        Text(
+            text = "Seed to use",
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(text = "How many images do you want to generate: $imageBatch")
-            Slider(
-                value = imageBatch.toFloat(),
-                valueRange = 1F..32F,
-                onValueChange = {
-                    imageBatch= it.toInt()
-                    viewModel.setBatchSize(imageBatch)
-                },
-                steps = 32
+
+            Text(text = "Use random seed")
+            Checkbox(
+                checked = uiState.isRandom,
+                onCheckedChange = {
+                    viewModel.setSeed(uiState.seed, it)
+                }
             )
         }
+
+        TextField(
+            enabled = !uiState.isRandom,
+            modifier = Modifier.fillMaxWidth(),
+            value = uiState.seed.toString(),
+            onValueChange = {
+                if (it.all { char -> char.isDigit() }) {
+                    viewModel.setSeed(it.toLong(), uiState.isRandom)
+                }
+            },
+            label = { Text("Seed value") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            trailingIcon = {
+                IconButton(onClick = {
+                    if (!uiState.isRandom) {
+                        viewModel.randomSeed()
+                    }
+                }) {
+                    Icon(
+                        imageVector = Ikona.Refresh,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                        )
+                }
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Ikona.Seed,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        )
+    }
 }
 

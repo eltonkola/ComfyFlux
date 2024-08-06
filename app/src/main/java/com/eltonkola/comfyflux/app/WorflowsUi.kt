@@ -1,6 +1,7 @@
 package com.eltonkola.comfyflux.app
 
 import android.widget.Space
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,20 +28,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.eltonkola.comfyflux.app.model.Workflow
 import com.eltonkola.comfyflux.app.model.workflows
+import com.eltonkola.comfyflux.ui.theme.Ikona
+import com.eltonkola.comfyflux.ui.theme.ikona.ArrowRight
+import com.eltonkola.comfyflux.ui.theme.ikona.Workflow
 
 @Composable
 fun WorkflowsUi(onSelect: (Workflow) -> Unit, uiState: ImageGenerationUiState) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(8.dp),) {
+        modifier = Modifier.fillMaxSize().padding(8.dp)) {
+        Text(
+            text = "Workflows",
+            style = MaterialTheme.typography.displaySmall
+        )
+        Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = "Select a workflow to generate images with.",
             style = MaterialTheme.typography.bodyLarge
         )
-        Spacer(modifier = Modifier.size(4.dp))
+        Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = "Make sure FLUX models are installed on your sever, and everything works on comfyUi itself, this app is just a ui utility on top of it.",
             style = MaterialTheme.typography.bodyMedium
@@ -62,7 +72,7 @@ fun WorkflowRow(workflow: Workflow, selected: Boolean,  onSelect: (Workflow) -> 
         horizontalArrangement = Arrangement.spacedBy(6.dp),
         modifier = Modifier.fillMaxWidth()
             .border(
-                width = if(selected) 1.dp else 0.dp,
+                width = if(selected) 2.dp else 0.dp,
                 color = MaterialTheme.colorScheme.primary,
                 shape = RoundedCornerShape(10.dp)
             )
@@ -72,8 +82,8 @@ fun WorkflowRow(workflow: Workflow, selected: Boolean,  onSelect: (Workflow) -> 
         }
     ) {
         Icon(
-            modifier = Modifier.size(64.dp),
-            imageVector = Icons.Default.MailOutline,
+            modifier = Modifier.padding(8.dp).size(40.dp),
+            imageVector = Ikona.Workflow,
             contentDescription = null
         )
         Column (
@@ -90,7 +100,7 @@ fun WorkflowRow(workflow: Workflow, selected: Boolean,  onSelect: (Workflow) -> 
         }
         Icon(
             modifier = Modifier.size(24.dp),
-            imageVector = Icons.Default.PlayArrow,
+            imageVector = Ikona.ArrowRight,
             contentDescription = null)
     }
 }

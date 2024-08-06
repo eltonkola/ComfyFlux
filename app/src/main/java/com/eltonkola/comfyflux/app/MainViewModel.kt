@@ -168,6 +168,10 @@ class MainViewModel(
 }""".trimIndent()
     }
 
+    fun randomSeed() {
+        _uiState.update { it.copy(seed = generateRandom16DigitNumber()) }
+    }
+
 }
 
 fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String {

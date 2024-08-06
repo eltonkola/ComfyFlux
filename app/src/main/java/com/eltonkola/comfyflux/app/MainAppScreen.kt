@@ -9,17 +9,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -47,6 +51,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.eltonkola.comfyflux.app.prompts.PromptSearch
+import com.eltonkola.comfyflux.ui.theme.Ikona
+import com.eltonkola.comfyflux.ui.theme.ikona.Create
+import com.eltonkola.comfyflux.ui.theme.ikona.History
+import com.eltonkola.comfyflux.ui.theme.ikona.Menu
+import com.eltonkola.comfyflux.ui.theme.ikona.Search
+import com.eltonkola.comfyflux.ui.theme.ikona.Settings
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,8 +91,9 @@ fun MainAppScreen(
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.Menu,
-                            contentDescription = "workflows"
+                            imageVector = Ikona.Menu,
+                            contentDescription = "workflows",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
                 },
@@ -92,11 +103,12 @@ fun MainAppScreen(
                 actions = {
 
                     IconButton(onClick = {
-                        showBottomSheet = true
+                        //TODO - open settings
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.AccountBox,
-                            contentDescription = "history"
+                            imageVector = Ikona.Settings,
+                            contentDescription = "settings",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -108,8 +120,9 @@ fun MainAppScreen(
                         }
                     }) {
                         Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = "prompts"
+                            imageVector = Ikona.Search,
+                            contentDescription = "prompts",
+                            modifier = Modifier.size(24.dp)
                         )
                     }
 
@@ -118,19 +131,53 @@ fun MainAppScreen(
 
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    if(!uiState.isLoading) {
-                        viewModel.generateImages()
-                        keyboardController?.hide()
-                    }
-                },
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+                ) {
 
-            ) {
-                if(uiState.isLoading) {
-                    Text(text = "Generating...")
-                }else{
-                    Text(text = "Create")
+                FloatingActionButton(
+                    containerColor = MaterialTheme.colorScheme.secondary,
+                    onClick = {
+                        showBottomSheet = true
+                    },
+                    modifier = Modifier.width(120.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+
+                        Icon(
+                            imageVector = Ikona.History,
+                            contentDescription = "History",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(text = "History")
+
+                    }
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                ExtendedFloatingActionButton(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    onClick = {
+                        if (!uiState.isLoading) {
+                            viewModel.generateImages()
+                            keyboardController?.hide()
+                        }
+                    },
+
+                    ) {
+                    Icon(
+                        imageVector = Ikona.Create,
+                        contentDescription = "Create",
+                        modifier = Modifier.size(24.dp)
+                    )
+
+                    if (uiState.isLoading) {
+                        Text(text = "Generating...")
+                    } else {
+                        Text(text = "Create")
+                    }
                 }
             }
         }

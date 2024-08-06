@@ -9,9 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +24,9 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import com.eltonkola.comfyflux.app.netwrok.DEFAULT_URL
+import com.eltonkola.comfyflux.ui.theme.Ikona
+import com.eltonkola.comfyflux.ui.theme.ikona.Refresh
+import com.eltonkola.comfyflux.ui.theme.ikona.Server
 
 @Composable
 fun ServerConnectionUi(viewModel: MainViewModel, uiState: ImageGenerationUiState) {
@@ -43,7 +43,11 @@ fun ServerConnectionUi(viewModel: MainViewModel, uiState: ImageGenerationUiState
             imeAction = ImeAction.Done
         ),
         leadingIcon = {
-            Icon(imageVector = Icons.Filled.Info, contentDescription = null)
+            Icon(
+                imageVector = Ikona.Server,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
         },
         supportingText = {
             val supportingText = if (uiState.loadingStats) {
@@ -92,7 +96,7 @@ fun ServerConnectionUi(viewModel: MainViewModel, uiState: ImageGenerationUiState
                     IconButton(onClick = { viewModel.checkStatus() }) {
                         Icon(
                             modifier = Modifier.size(16.dp),
-                            imageVector = Icons.Default.Refresh,
+                            imageVector = Ikona.Refresh,
                             contentDescription = "Connect",
                             tint =  MaterialTheme.colorScheme.primary
                         )
