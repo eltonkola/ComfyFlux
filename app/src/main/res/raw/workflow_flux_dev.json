@@ -12,7 +12,7 @@
   },
   "6": {
     "inputs": {
-      "text": "a cat with a hat",
+      "text": "__prompt__",
       "clip": [
         "11",
         0
@@ -152,7 +152,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": 652247521118320
+      "noise_seed": __seed__
     },
     "class_type": "RandomNoise",
     "_meta": {

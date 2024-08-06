@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -41,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -64,8 +66,10 @@ fun MainAppScreen(
 
     val drawerStateLeft = rememberDrawerState(initialValue = DrawerValue.Closed)
     val drawerStateRight = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
+        
         topBar = {
             TopAppBar(
                 navigationIcon = {
@@ -88,6 +92,15 @@ fun MainAppScreen(
                 actions = {
 
                     IconButton(onClick = {
+                        showBottomSheet = true
+                    }) {
+                        Icon(
+                            imageVector = Icons.Filled.AccountBox,
+                            contentDescription = "history"
+                        )
+                    }
+
+                    IconButton(onClick = {
                         scope.launch {
                             drawerStateRight.apply {
                                 if (isClosed) open() else close()
@@ -99,12 +112,29 @@ fun MainAppScreen(
                             contentDescription = "prompts"
                         )
                     }
+
                 }
             )
 
         },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    if(!uiState.isLoading) {
+                        viewModel.generateImages()
+                        keyboardController?.hide()
+                    }
+                },
 
-        ) { contentPadding ->
+            ) {
+                if(uiState.isLoading) {
+                    Text(text = "Generating...")
+                }else{
+                    Text(text = "Create")
+                }
+            }
+        }
+    ) { contentPadding ->
 
         Column(
             modifier = Modifier.padding(contentPadding)
@@ -122,18 +152,13 @@ fun MainAppScreen(
                                     viewModel.setCurrentImage(null)
                                 }
                             } else {
-                                CreateUi(uiState, viewModel,
-                                    {
-                                        scope.launch {
-                                            drawerStateLeft.apply {
-                                                if (isClosed) open() else close()
-                                            }
+                                CreateUi(uiState, viewModel) {
+                                    scope.launch {
+                                        drawerStateLeft.apply {
+                                            if (isClosed) open() else close()
                                         }
-                                    },
-                                    {
-                                        showBottomSheet = true
                                     }
-                                )
+                                }
                             }
                         } else {
                             Text(text = "Please make sure your server in online, and in the same network, to be able to use this app.\nRemember, this us just a minimal front ent for simple flows.")

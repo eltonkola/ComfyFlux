@@ -78,7 +78,6 @@ import kotlinx.coroutines.withContext
 fun CreateUi(uiState: ImageGenerationUiState,
              viewModel: MainViewModel,
              openWorkflows:() -> Unit,
-             openHistory:() -> Unit,
              ) {
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -149,48 +148,10 @@ fun CreateUi(uiState: ImageGenerationUiState,
             }
         }
 
-
-
-
         Spacer(modifier = Modifier.height(16.dp))
-
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
-            Button(
-                modifier = Modifier.align(Alignment.CenterEnd),
-                onClick = {
-                    viewModel.generateImages()
-                    keyboardController?.hide()
-                },
-                enabled = !uiState.isLoading
-            ) {
-                Text(if (uiState.isLoading) "Loading..." else "Generate Images")
-            }
-        }
-
 
         if (uiState.error != null) {
             Text("Error: ${uiState.error}")
-        }
-
-
-
-        Spacer(modifier = Modifier
-            .fillMaxWidth()
-            .weight(1f))
-
-        Button(
-            modifier = Modifier,
-            onClick = {
-                openHistory()
-            },
-            enabled = true
-        ) {
-            Text("Show History")
         }
 
     }

@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.InputStream
 import java.nio.charset.Charset
+import kotlin.random.Random
 
 data class ImageGenerationUiState(
     val prompt: String = "a cat with a hat",
@@ -35,7 +36,9 @@ data class ImageGenerationUiState(
     val workflow: Workflow = workflows.first(),
     val width: Int = 512,
     val height: Int = 512,
-    val batchSize: Int = 1
+    val batchSize: Int = 1,
+    val seed: Long = generateRandom16DigitNumber(),
+    val isRandom : Boolean = true
 )
 
 class ImageGenerationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
@@ -104,6 +107,12 @@ class MainViewModel(
         }
     }
 
+    fun setSeed(seed: Long, isRandom: Boolean){
+        viewModelScope.launch {
+            _uiState.update { it.copy(seed = seed, isRandom = isRandom) }
+        }
+    }
+
     fun generateImages() {
         viewModelScope.launch {
 
@@ -140,10 +149,18 @@ class MainViewModel(
         val workflow = _uiState.value.workflow
         val promptRaw = context.resources.openRawResource(workflow.workflowRes)
         var prompt = promptRaw.readTextAndClose()
+        val seed = if(uiState.value.isRandom) {
+            val newSeed = generateRandom16DigitNumber()
+            _uiState.update { it.copy(seed = newSeed) }
+            newSeed
+        } else {
+            uiState.value.seed
+        }
         prompt = prompt.replace("__prompt__", uiState.value.prompt)
         prompt = prompt.replace("__width__", uiState.value.width.toString())
         prompt = prompt.replace("__height__", uiState.value.height.toString())
         prompt = prompt.replace("__batch_size__", uiState.value.batchSize.toString())
+        prompt = prompt.replace("__seed__", seed.toString())
 
         return """{
   "client_id": "${fluxAPI.clientId}",
@@ -156,3 +173,9 @@ class MainViewModel(
 fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String {
     return this.bufferedReader(charset).use { it.readText() }
 }
+
+fun generateRandom16DigitNumber(): Long {
+    val random = Random.nextLong(100000000000000, 999999999999999)
+    return random
+}
+
