@@ -131,52 +131,54 @@ fun MainAppScreen(
 
         },
         floatingActionButton = {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+            if(uiState.image == null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
                 ) {
 
-                FloatingActionButton(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    onClick = {
-                        showBottomSheet = true
-                    },
-                    modifier = Modifier.width(120.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
+                    FloatingActionButton(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        onClick = {
+                            showBottomSheet = true
+                        },
+                        modifier = Modifier.width(120.dp)
                     ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
 
+                            Icon(
+                                imageVector = Ikona.History,
+                                contentDescription = "History",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(text = "History")
+
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+                    ExtendedFloatingActionButton(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        onClick = {
+                            if (!uiState.isLoading) {
+                                viewModel.generateImages()
+                                keyboardController?.hide()
+                            }
+                        },
+
+                        ) {
                         Icon(
-                            imageVector = Ikona.History,
-                            contentDescription = "History",
+                            imageVector = Ikona.Create,
+                            contentDescription = "Create",
                             modifier = Modifier.size(24.dp)
                         )
-                        Text(text = "History")
 
-                    }
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-                ExtendedFloatingActionButton(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    onClick = {
-                        if (!uiState.isLoading) {
-                            viewModel.generateImages()
-                            keyboardController?.hide()
+                        if (uiState.isLoading) {
+                            Text(text = "Generating...")
+                        } else {
+                            Text(text = "Create")
                         }
-                    },
-
-                    ) {
-                    Icon(
-                        imageVector = Ikona.Create,
-                        contentDescription = "Create",
-                        modifier = Modifier.size(24.dp)
-                    )
-
-                    if (uiState.isLoading) {
-                        Text(text = "Generating...")
-                    } else {
-                        Text(text = "Create")
                     }
                 }
             }
