@@ -1,5 +1,6 @@
 [versions]
 agp = "8.5.1"
+coilCompose = "2.7.0"
 kotlin = "2.0.0"
 coreKtx = "1.13.1"
 junit = "4.13.2"
@@ -23,6 +24,7 @@ androidx-navigation-compose = { module = "androidx.navigation:navigation-compose
 androidx-paging-compose = { module = "androidx.paging:paging-compose", version.ref = "pagingRuntime" }
 androidx-paging-runtime = { module = "androidx.paging:paging-runtime", version.ref = "pagingRuntime" }
 
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

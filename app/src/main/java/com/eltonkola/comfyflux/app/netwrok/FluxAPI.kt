@@ -1,6 +1,7 @@
 package com.eltonkola.comfyflux.app.netwrok
 
 import android.util.Log
+import com.eltonkola.comfyflux.app.history.HistoryItem
 import com.eltonkola.comfyflux.app.model.SystemStats
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
@@ -19,13 +20,16 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
+import java.util.Date
 import java.util.UUID
 
 @Serializable
@@ -228,4 +232,25 @@ class FluxAPI {
         }
     }
 
+    suspend fun fetchHistory(): List<HistoryItem> {
+        return withContext(Dispatchers.IO) {
+            val response = client.get("http://$serverAddress/history")
+            val responseBody = response.bodyAsText()
+
+            Log.d("FluxAPI", "Received fetchHistory responseBody: $responseBody")
+            val history = Json.decodeFromString<Map<String, HistoryResponse>>(responseBody)
+            Log.d("FluxAPI", "call fetchHistory history: $history")
+
+            history.values.map { it.normalize() }
+        }
+    }
+
+
+    private fun HistoryResponse.normalize(): HistoryItem{
+        return HistoryItem(
+            images = this.outputs.values.flatMap { it.images.filter { it.type == "output" }.map { "http://$serverAddress/view?filename=${it.filename}&type=${it.type}&subfolder=${it.subfolder}"} },
+            success = this.status.status_str == "success",
+            completed = this.status.completed
+        )
+    }
 }

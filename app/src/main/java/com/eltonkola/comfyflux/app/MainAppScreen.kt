@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.eltonkola.comfyflux.app.history.HistoryAndQueue
 import com.eltonkola.comfyflux.app.prompts.PromptSearch
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Create
@@ -219,7 +220,7 @@ fun MainAppScreen(
                 },
                 sheetState = sheetState
             ) {
-                HistoryUi(contentPadding) {
+                HistoryAndQueue() {
                     scope.launch { sheetState.hide() }.invokeOnCompletion {
                         if (!sheetState.isVisible) {
                             showBottomSheet = false
