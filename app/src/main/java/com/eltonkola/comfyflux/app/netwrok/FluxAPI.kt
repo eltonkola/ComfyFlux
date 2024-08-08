@@ -1,6 +1,7 @@
 package com.eltonkola.comfyflux.app.netwrok
 
 import android.util.Log
+import com.eltonkola.comfyflux.app.cleanPrompt
 import com.eltonkola.comfyflux.app.history.HistoryItem
 import com.eltonkola.comfyflux.app.model.SystemStats
 import io.ktor.client.HttpClient
@@ -29,6 +30,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonObject
 import java.util.Date
 import java.util.UUID
 
@@ -247,10 +249,18 @@ class FluxAPI {
 
 
     private fun HistoryResponse.normalize(): HistoryItem{
+
+        val prompt = this.prompt[2].jsonObject["6"]!!.jsonObject["inputs"]!!.jsonObject["text"]
+
         return HistoryItem(
             images = this.outputs.values.flatMap { it.images.filter { it.type == "output" }.map { "http://$serverAddress/view?filename=${it.filename}&type=${it.type}&subfolder=${it.subfolder}"} },
             success = this.status.status_str == "success",
-            completed = this.status.completed
+            completed = this.status.completed,
+            prompt = prompt.toString().cleanHistoryPrompt()
         )
     }
+}
+
+fun String.cleanHistoryPrompt() : String {
+    return this.trim('"').trim('\\').removePrefix("\"")
 }

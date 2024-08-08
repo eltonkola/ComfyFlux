@@ -40,11 +40,7 @@ fun HistoryAndQueue(
             .fillMaxWidth()
             .defaultMinSize(minHeight = 360.dp)
             .padding(8.dp)) {
-            
-            Button(onClick = { viewModel.loadHistory() }) {
-                Text(text = "Reload history")
-            }
-            
+
             TabRow(selectedTabIndex = tabIndex) {
                 tabs.forEachIndexed { index, title ->
                     Tab(text = { Text(title) },

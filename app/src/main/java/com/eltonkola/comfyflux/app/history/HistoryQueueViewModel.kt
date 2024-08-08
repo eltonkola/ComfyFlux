@@ -4,16 +4,12 @@ package com.eltonkola.comfyflux.app.history
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.RemoteMediator
-import com.eltonkola.comfyflux.app.ImageGenerationUiState
 import com.eltonkola.comfyflux.app.netwrok.FluxAPI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.lang.Error
-import java.util.Date
 
 data class HistoryUiState(
     val history: List<HistoryItem> = emptyList(),
@@ -54,5 +50,6 @@ class HistoryQueueViewModel(
 data class HistoryItem(
     val images: List<String>,
     val success: Boolean,
-    val completed: Boolean
+    val completed: Boolean,
+    val prompt: String
 )
