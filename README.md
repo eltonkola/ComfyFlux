@@ -108,8 +108,13 @@ If you followed the steps above you should be able to connect to your ComfyUi se
 ## Roadmap
 
 - [x] MPV app
-- [x] History and Queue
+- [x] History
+- [x] Queue
+- [x] Promt db
+- [x] Grow prompt enricher
+- [ ] Better progress indicator
 - [ ] Better workflow managment
+- [ ] Better image gallery
 
 
 See the [open issues](https://github.com/eltonkola/ComfyFlux/issues) for a full list of proposed features (and known issues).
@@ -125,6 +130,8 @@ Contributions are what make the open source community such an amazing place to l
 
 If you have a suggestion that would make this better, please fork the repo and create a pull request. You can also simply open an issue with the tag "enhancement".
 Don't forget to give the project a star! Thanks again!
+
+That said probbaly i will forget about this app and never spend any time on it.
 
 1. Fork the Project
 2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
@@ -181,7 +188,7 @@ Here are some great links very yseful to this project!
 [license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://linkedin.com/in/eltonkola
-[product-screenshot]: images/screenshot.png
+[product-screenshot]: screenshots/Screenshot_20240808_184838.png
 
 [coil-shield]: https://img.shields.io/badge/Coil-000000.svg?style=for-the-badge&logo=Coil&logoColor=white
 [coil-url]: https://github.com/coil-kt/coil
