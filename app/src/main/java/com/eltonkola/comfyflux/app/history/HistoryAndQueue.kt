@@ -31,6 +31,8 @@ fun HistoryAndQueue(
 
     val historyUiState by viewModel.historyUiState.collectAsState()
 
+    val queueUiState by viewModel.queueUiState.collectAsState()
+
         var tabIndex by remember { mutableIntStateOf(0) }
 
         val tabs = listOf("History", "Queue")
@@ -51,7 +53,7 @@ fun HistoryAndQueue(
             }
             when (tabIndex) {
                 0 -> HistoryTab(viewModel, historyUiState)
-                1 -> QueueTab()
+                1 -> QueueTab(viewModel, queueUiState)
             }
         }
 

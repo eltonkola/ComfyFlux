@@ -17,6 +17,12 @@ data class HistoryUiState(
     val error: Boolean = false
 )
 
+data class QueueUiState(
+    val queue: Queue? = null,
+    val loading: Boolean = true,
+    val error: Boolean = false
+)
+
 class HistoryQueueViewModel(
     private val fluxAPI: FluxAPI = FluxAPI()
     ) : ViewModel() {
@@ -25,8 +31,13 @@ class HistoryQueueViewModel(
     val historyUiState: StateFlow<HistoryUiState> = _historyUiState.asStateFlow()
 
 
+    private val _queueUiState = MutableStateFlow(QueueUiState())
+    val queueUiState: StateFlow<QueueUiState> = _queueUiState.asStateFlow()
+
+
     init {
         loadHistory()
+        loadQueue()
     }
 
     fun loadHistory() {
@@ -45,6 +56,30 @@ class HistoryQueueViewModel(
             }
         }
     }
+
+    fun loadQueue(intial: Boolean = true) {
+        if(intial) {
+            _queueUiState.update { it.copy(loading = true) }
+        }
+        viewModelScope.launch {
+            try{
+                val queue = fluxAPI.fetchQueue()
+                Log.d("HistoryQueueViewModel", "queue pending: ${queue.pending.size}")
+
+                _queueUiState.update { it.copy(loading = false, queue = queue, error = false) }
+            }catch (e: Exception){
+
+                _queueUiState.update { it.copy(loading = false, error = true) }
+            }
+        }
+    }
+
+    fun cancelQueueWorkflow(workflow: Queue.Workflow) {
+        viewModelScope.launch {
+            fluxAPI.cancelWorkflow(workflow.id)
+            loadQueue(intial = false)
+        }
+    }
 }
 
 data class HistoryItem(
@@ -53,3 +88,13 @@ data class HistoryItem(
     val completed: Boolean,
     val prompt: String
 )
+
+data class Queue(
+    val running: List<Workflow>,
+    val pending: List<Workflow>,
+){
+    data class Workflow(
+        val id: String,
+        val prompt: String
+    )
+}

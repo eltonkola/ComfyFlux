@@ -1,5 +1,6 @@
 package com.eltonkola.comfyflux.app.history
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -92,6 +93,7 @@ fun HistoryTab(viewModel: HistoryQueueViewModel, uiState: HistoryUiState) {
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
 @Composable
 fun HistoryRowUi(item: HistoryItem) {
     val clipboardManager = LocalClipboardManager.current

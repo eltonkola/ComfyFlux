@@ -3,12 +3,14 @@ package com.eltonkola.comfyflux.app.netwrok
 import android.util.Log
 import com.eltonkola.comfyflux.app.cleanPrompt
 import com.eltonkola.comfyflux.app.history.HistoryItem
+import com.eltonkola.comfyflux.app.history.Queue
 import com.eltonkola.comfyflux.app.model.SystemStats
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -19,6 +21,7 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpMethod
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.util.InternalAPI
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.Dispatchers
@@ -26,11 +29,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.add
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
+import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.putJsonArray
 import java.util.Date
 import java.util.UUID
 
@@ -247,6 +255,62 @@ class FluxAPI {
         }
     }
 
+    suspend fun fetchQueue(): Queue {
+        return withContext(Dispatchers.IO) {
+            val response = client.get("http://$serverAddress/queue")
+            val responseBody = response.bodyAsText()
+
+            Log.d("FluxAPI", "Received fetchQueue responseBody: $responseBody")
+            val queue = Json.decodeFromString<QueueResponse>(responseBody)
+            Log.d("FluxAPI", "call fetchQueue queue: $queue")
+
+            queue.normalize()
+        }
+    }
+
+    private fun QueueResponse.normalize() : Queue {
+        Log.d("FluxAPI", "call QueueResponse normalize: $this")
+
+        return Queue(
+            running = this.queue_running.map { it.toQueueWorkflow() },
+            pending = this.queue_pending.map { it.toQueueWorkflow() }
+        )
+    }
+
+    private fun JsonElement.toQueueWorkflow() : Queue.Workflow {
+        val prompt = this.jsonArray[2].jsonObject["6"]!!.jsonObject["inputs"]!!.jsonObject["text"].toString().cleanHistoryPrompt()
+        val id = this.jsonArray[1].toString().replace("\"", "")
+
+        Log.d("FluxAPI", "call toQueueWorkflow: $this")
+
+
+        return Queue.Workflow(
+            prompt = prompt,
+            id = id
+        )
+    }
+
+    @OptIn(InternalAPI::class)
+    suspend fun cancelWorkflow(id: String){
+        val deleteBody = buildJsonObject {
+            putJsonArray("delete") {
+                add(id)
+            }
+        }.toString()
+
+        return withContext(Dispatchers.IO) {
+            val response = client.post("http://$serverAddress/queue") {
+                contentType(ContentType.Application.Json)
+                body = deleteBody
+            }
+            val responseBody = response.bodyAsText()
+
+            Log.d("FluxAPI", "Received deleteBody: $deleteBody")
+
+            Log.d("FluxAPI", "Received delete workflow: $responseBody")
+        }
+    }
+
 
     private fun HistoryResponse.normalize(): HistoryItem{
 
@@ -259,6 +323,8 @@ class FluxAPI {
             prompt = prompt.toString().cleanHistoryPrompt()
         )
     }
+
+
 }
 
 fun String.cleanHistoryPrompt() : String {
