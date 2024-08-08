@@ -170,6 +170,7 @@ Here are some great links very yseful to this project!
 
 * [ComfyUi](https://github.com/comfyanonymous/ComfyUI)
 * [Prompts](https://huggingface.co/datasets/Gustavosta/Stable-Diffusion-Prompts)
+* [Composables Icons](https://www.composables.com/icons)
   
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
