@@ -7,6 +7,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.eltonkola.comfyflux.R
+import com.eltonkola.comfyflux.app.model.HistoryUiState
+import com.eltonkola.comfyflux.app.model.Queue
+import com.eltonkola.comfyflux.app.model.QueueUiState
 import com.eltonkola.comfyflux.app.model.SystemStats
 import com.eltonkola.comfyflux.app.model.Workflow
 import com.eltonkola.comfyflux.app.model.workflows
@@ -58,8 +61,18 @@ class MainViewModel(
     private val groqAPI: GroqAPI = GroqAPI()
 ) : ViewModel() {
 
+    //main screen state
     private val _uiState = MutableStateFlow(ImageGenerationUiState())
     val uiState: StateFlow<ImageGenerationUiState> = _uiState.asStateFlow()
+
+    //history state
+    private val _historyUiState = MutableStateFlow(HistoryUiState())
+    val historyUiState: StateFlow<HistoryUiState> = _historyUiState.asStateFlow()
+
+    //queue state
+    private val _queueUiState = MutableStateFlow(QueueUiState())
+    val queueUiState: StateFlow<QueueUiState> = _queueUiState.asStateFlow()
+
 
     init {
         checkStatus()
@@ -185,6 +198,46 @@ class MainViewModel(
     fun randomSeed() {
         _uiState.update { it.copy(seed = generateRandom16DigitNumber()) }
     }
+
+
+
+    //history and queue
+
+    fun loadHistory() {
+        _historyUiState.update { it.copy(loading = true) }
+        viewModelScope.launch {
+            try{
+                val history = fluxAPI.fetchHistory()
+                Log.d("HistoryQueueViewModel", "history: ${history.size}")
+                _historyUiState.update { it.copy(loading = false, history = history.reversed(), error = false) }
+            }catch (e: Exception){
+                _historyUiState.update { it.copy(loading = false, error = true) }
+            }
+        }
+    }
+
+    fun loadQueue(showLoading: Boolean = true) {
+        if(showLoading) {
+            _queueUiState.update { it.copy(loading = true) }
+        }
+        viewModelScope.launch {
+            try{
+                val queue = fluxAPI.fetchQueue()
+                Log.d("HistoryQueueViewModel", "queue pending: ${queue.pending.size}")
+                _queueUiState.update { it.copy(loading = false, queue = queue, error = false) }
+            }catch (e: Exception){
+                _queueUiState.update { it.copy(loading = false, error = true) }
+            }
+        }
+    }
+
+    fun cancelQueueWorkflow(workflow: Queue.Workflow) {
+        viewModelScope.launch {
+            fluxAPI.cancelWorkflow(workflow.id)
+            loadQueue(showLoading = false)
+        }
+    }
+
 
 }
 

@@ -106,7 +106,7 @@ fun CreateUi(
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        text = uiState.workflow.name,
+                        text = "Workflow: ${uiState.workflow.name}",
                         style = MaterialTheme.typography.bodyMedium
                     )
                 }

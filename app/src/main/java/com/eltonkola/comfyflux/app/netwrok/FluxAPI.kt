@@ -1,16 +1,14 @@
 package com.eltonkola.comfyflux.app.netwrok
 
 import android.util.Log
-import com.eltonkola.comfyflux.app.cleanPrompt
-import com.eltonkola.comfyflux.app.history.HistoryItem
-import com.eltonkola.comfyflux.app.history.Queue
+import com.eltonkola.comfyflux.app.model.HistoryItem
+import com.eltonkola.comfyflux.app.model.Queue
 import com.eltonkola.comfyflux.app.model.SystemStats
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.client.plugins.websocket.webSocket
-import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -29,7 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -39,7 +36,6 @@ import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.putJsonArray
-import java.util.Date
 import java.util.UUID
 
 @Serializable
@@ -312,7 +308,7 @@ class FluxAPI {
     }
 
 
-    private fun HistoryResponse.normalize(): HistoryItem{
+    private fun HistoryResponse.normalize(): HistoryItem {
 
         val prompt = this.prompt[2].jsonObject["6"]!!.jsonObject["inputs"]!!.jsonObject["text"]
 

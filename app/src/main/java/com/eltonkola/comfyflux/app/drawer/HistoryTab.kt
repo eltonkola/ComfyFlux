@@ -1,13 +1,10 @@
-package com.eltonkola.comfyflux.app.history
+package com.eltonkola.comfyflux.app.drawer
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,6 +25,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -35,14 +36,26 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.eltonkola.comfyflux.app.MainViewModel
+import com.eltonkola.comfyflux.app.model.HistoryItem
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Copy
 import com.eltonkola.comfyflux.ui.theme.ikona.Error
+import com.eltonkola.comfyflux.ui.theme.ikona.Image
 import com.eltonkola.comfyflux.ui.theme.ikona.Refresh
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryTab(viewModel: HistoryQueueViewModel, uiState: HistoryUiState) {
+fun HistoryTab( viewModel: MainViewModel) {
+
+    val uiState by viewModel.historyUiState.collectAsState()
+
+    LaunchedEffect(key1 = Unit) {
+        if(uiState.history.isEmpty()) {
+            viewModel.loadHistory()
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -65,7 +78,9 @@ fun HistoryTab(viewModel: HistoryQueueViewModel, uiState: HistoryUiState) {
             if (uiState.loading) {
                 CircularProgressIndicator()
             } else if (uiState.error) {
-                Column {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Icon(imageVector = Ikona.Error, contentDescription = "error")
                     Text(text = "Error loading history!")
                     TextButton(onClick = { viewModel.loadHistory() }) {
@@ -102,15 +117,31 @@ fun HistoryRowUi(item: HistoryItem) {
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                items(item.images) {
-                    AsyncImage(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(MaterialTheme.colorScheme.secondary),
-                        model = item.images.first(),
-                        contentDescription = null,
-                    )
+                if(item.images.isNotEmpty()) {
+                    items(item.images) {
+                        AsyncImage(
+                            modifier = Modifier
+                                .size(120.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(MaterialTheme.colorScheme.secondary),
+                            model = item.images.first(),
+                            contentDescription = null,
+                        )
+                    }
+                }else{
+                 item{
+                  Box(modifier = Modifier.size(120.dp)
+                      .clip(RoundedCornerShape(10.dp))
+                      .background(MaterialTheme.colorScheme.secondary),
+                      contentAlignment = Alignment.Center
+                  ){
+                      Icon(
+                          imageVector = Ikona.Image,
+                          contentDescription = "failed",
+                          tint = MaterialTheme.colorScheme.onSecondary
+                      )
+                  }
+                 }
                 }
                 item {
                     Row {
