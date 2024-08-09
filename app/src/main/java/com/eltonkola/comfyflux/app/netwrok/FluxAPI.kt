@@ -4,6 +4,7 @@ import android.util.Log
 import com.eltonkola.comfyflux.app.model.HistoryItem
 import com.eltonkola.comfyflux.app.model.Queue
 import com.eltonkola.comfyflux.app.model.SystemStats
+import com.eltonkola.comfyflux.app.model.WSMessage
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -126,7 +127,7 @@ class FluxAPI {
         serverAddress = address
     }
 
-    suspend fun queuePrompt(prompt: String): String {
+    private suspend fun queuePrompt(prompt: String): String {
         // val jsonString = Json.encodeToString(prompt)
         Log.d("FluxAPI", "Sending prompt: $prompt")
         val response = client.post("http://$serverAddress/prompt") {
@@ -139,15 +140,7 @@ class FluxAPI {
         return jsonResponse.prompt_id
     }
 
-    suspend fun getImage(filename: String, subfolder: String, folderType: String): ByteArray {
-        return client.get("http://$serverAddress/view") {
-            parameter("filename", filename)
-            parameter("subfolder", subfolder)
-            parameter("type", folderType)
-        }.readBytes()
-    }
-
-    suspend fun getHistory(promptId: String): PromptHistory {
+    private suspend fun getHistory(promptId: String): PromptHistory {
         val response = client.get("http://$serverAddress/history/$promptId")
         val jsonResponse = response.bodyAsText()
         Log.d("FluxAPI", "Received history response: $jsonResponse")
@@ -169,9 +162,8 @@ class FluxAPI {
         return PromptHistory(historyData)
     }
 
-    suspend fun getImages(prompt: String): Map<String, List<ByteArray>> {
+    suspend fun getImages(prompt: String): List<String> {
         val promptId = queuePrompt(prompt)
-        val outputImages = mutableMapOf<String, MutableList<ByteArray>>()
 
         // Create a MutableStateFlow to keep track of when the queue is empty
         val queueStatusFlow = MutableStateFlow<Boolean>(false)
@@ -188,6 +180,10 @@ class FluxAPI {
                 if (frame is Frame.Text) {
                     val messageText = frame.readText()
                     Log.d("FluxAPI", "Received websocket raw: $messageText")
+
+//                    val msg = WSMessage.fromJson(messageText)
+//                    Log.d("FluxAPI", "Received ws message: $msg")
+
 
                     val json = Json { ignoreUnknownKeys = true }
                     val message = json.decodeFromString<WebSocketMessage>(messageText)
@@ -210,17 +206,18 @@ class FluxAPI {
 
         val historyResponse: PromptHistory = getHistory(promptId)
         val history = historyResponse.outputs
-        for ((nodeId, nodeOutput) in history) {
-            val imagesOutput = nodeOutput.outputs.map { it.value }.flatMap { elem ->
+        val images = history.values.flatMap {
+            it.outputs.map { it.value }.flatMap { elem ->
                 elem.images.map { image ->
-                    getImage(image.filename, image.subfolder, image.type)
-                }
-            }.toMutableList()
-            outputImages[nodeId] = imagesOutput
+                    "http://$serverAddress/view?filename=${image.filename}&subfolder=${image.subfolder}&type=${image.type}"
+                }.toMutableList()
+            }
         }
-
-        return outputImages
+        Log.d("FluxAPI", "Images: ${images.size}")
+        return images
     }
+
+
 
     suspend fun checkSystemStats(): SystemStats? {
         Log.d("FluxAPI", "call checkSystemStats")

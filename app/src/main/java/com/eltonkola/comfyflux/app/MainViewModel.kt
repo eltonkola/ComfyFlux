@@ -40,10 +40,10 @@ import kotlin.random.Random
 data class ImageGenerationUiState(
     val prompt: String = "a cat with a hat",
     val server: String = DEFAULT_URL,
-    val images: Map<String, List<ByteArray>> = emptyMap(),
+    val images: List<String> = emptyList(),
     val isLoading: Boolean = false,
     val error: String? = null,
-    val image: Bitmap? = null,
+    val image: String? = null,
 
     val loadingStats: Boolean = false,
     val stats: SystemStats? = null,
@@ -108,7 +108,7 @@ class MainViewModel(
     }
 
 
-    fun setCurrentImage(image: Bitmap?){
+    fun setCurrentImage(image: String?){
         viewModelScope.launch {
             _uiState.update { it.copy(image = image) }
         }

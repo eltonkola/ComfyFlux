@@ -8,28 +8,41 @@ import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.eltonkola.comfyflux.R
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Back
 import com.eltonkola.comfyflux.ui.theme.ikona.Download
 import com.eltonkola.comfyflux.ui.theme.ikona.Share
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -40,6 +53,7 @@ fun PhotoViewerScreen(
 ) {
 
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -49,13 +63,14 @@ fun PhotoViewerScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        saveImageToDownloads(
-                            context,
-                            uiState.image!!,
-                            "flux_image_${System.currentTimeMillis()}.png",
-                            true
-                        )
-
+                        coroutineScope.launch {
+                            saveImageToDownloads(
+                                context,
+                                uiState.image!!,
+                                "flux_image_${System.currentTimeMillis()}.png",
+                                true
+                            )
+                        }
                     }) {
                         Icon(
                             imageVector = Ikona.Share,
@@ -64,13 +79,14 @@ fun PhotoViewerScreen(
                         )
                     }
                     IconButton(onClick = {
-                        saveImageToDownloads(
-                            context,
-                            uiState.image!!,
-                            "flux_image_${System.currentTimeMillis()}.png",
-                            false
-                        )
-
+                        coroutineScope.launch {
+                            saveImageToDownloads(
+                                context,
+                                uiState.image!!,
+                                "flux_image_${System.currentTimeMillis()}.png",
+                                false
+                            )
+                        }
                     }) {
                         Icon(
                             imageVector = Ikona.Download,
@@ -96,11 +112,14 @@ fun PhotoViewerScreen(
             modifier = Modifier.padding(it),
             contentAlignment = Alignment.BottomEnd
         ) {
-            Image(
-                bitmap = uiState.image!!.asImageBitmap(),
+
+            AsyncImage(
+                modifier = Modifier.fillMaxSize(),
+                model = uiState.image!!,
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize()
+                contentScale = ContentScale.Fit
             )
+
 
         }
     }
@@ -114,32 +133,52 @@ private fun share(context: Context, uri: Uri) {
     context.startActivity(Intent.createChooser(intent,"Share Image"))
 }
 
-fun saveImageToDownloads(context: Context, bitmap: Bitmap, filename: String, share: Boolean = false) {
-    val resolver = context.contentResolver
-    val contentValues = ContentValues().apply {
-        put(MediaStore.Images.Media.DISPLAY_NAME, filename)
-        put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-        put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/${context.getString(R.string.app_name)}")
-    }
-
-    try {
-        val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
-        uri?.let {
-            resolver.openOutputStream(it)?.use { outputStream ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
-                outputStream.flush()
-                if(share){
-                    share(context, uri)
-                }
-                Toast.makeText(context, "Image saved to Pictures", Toast.LENGTH_SHORT).show()
-            } ?: run {
-                Toast.makeText(context, "Failed to open output stream", Toast.LENGTH_SHORT).show()
-            }
-        } ?: run {
-            Toast.makeText(context, "Failed to insert image", Toast.LENGTH_SHORT).show()
+suspend fun saveImageToDownloads(context: Context, imageUrl: String, filename: String, share: Boolean = false) {
+    withContext(Dispatchers.IO) {
+        val resolver = context.contentResolver
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, filename)
+            put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/${context.getString(R.string.app_name)}")
         }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
+
+        try {
+            val url = URL(imageUrl)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.doInput = true
+            connection.connect()
+
+            val input: InputStream = connection.inputStream
+            val uri = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+            uri?.let {
+                resolver.openOutputStream(it)?.use { outputStream ->
+                    input.use { inputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
+                    outputStream.flush()
+
+                    withContext(Dispatchers.Main) {
+                        if (share) {
+                            share(context, uri)
+                        }
+                        Toast.makeText(context, "Image saved to Pictures", Toast.LENGTH_SHORT).show()
+                    }
+                } ?: run {
+                    withContext(Dispatchers.Main) {
+                        Toast.makeText(context, "Failed to open output stream", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            } ?: run {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "Failed to insert image", Toast.LENGTH_SHORT).show()
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }

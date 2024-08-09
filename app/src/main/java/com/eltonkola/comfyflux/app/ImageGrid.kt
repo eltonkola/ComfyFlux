@@ -1,8 +1,6 @@
 package com.eltonkola.comfyflux.app
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,41 +10,25 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import coil.compose.AsyncImage
 
 
 @Composable
-fun ImageGrid(images: Map<String, List<ByteArray>>, onZoom: (Bitmap) -> Unit) {
+fun ImageGrid(images: List<String>, onZoom: (String) -> Unit) {
 
     LazyVerticalGrid(
         modifier = Modifier.fillMaxSize(),
         columns = GridCells.Adaptive(minSize = 160.dp),
         contentPadding = PaddingValues(4.dp)
     ) {
-        for ((nodeId, imageList) in images) {
-            items(imageList.size) { index ->
-                val imageData = imageList[index]
-                var bitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
-
-                LaunchedEffect(imageData) {
-                    bitmap = withContext(Dispatchers.Default) {
-                        BitmapFactory.decodeByteArray(imageData, 0, imageData.size)
-                    }
-                }
-
-                bitmap?.let {
+            items(images.size) { index ->
 
                     Box(
                         modifier = Modifier
@@ -54,21 +36,22 @@ fun ImageGrid(images: Map<String, List<ByteArray>>, onZoom: (Bitmap) -> Unit) {
                             .size(160.dp)
                             .clip(RoundedCornerShape(10.dp))
                             .clickable {
-                                onZoom(it)
+                                onZoom(images[index])
                             }
                         ,
                     ) {
-                        Image(
-                            bitmap = it.asImageBitmap(),
-                            contentDescription = "Generated image from node $nodeId",
+                        AsyncImage(
                             modifier = Modifier
-                                .fillMaxSize(),
+                                .fillMaxSize()
+                                .clip(RoundedCornerShape(2.dp))
+                                .background(MaterialTheme.colorScheme.primary),
+                            model = images[index],
+                            contentDescription = null,
                             contentScale = ContentScale.Crop
                         )
 
-                    }
                 }
             }
-        }
+
     }
 }
