@@ -35,13 +35,10 @@ import kotlin.random.Random
 data class ImageGenerationUiState(
     val prompt: String = "a cat with a hat",
     val server: String = DEFAULT_URL,
-    val images: List<String> = emptyList(),
-    val isLoading: Boolean = false,
-    val error: String? = null,
-    val image: String? = null,
 
     val loadingStats: Boolean = false,
     val stats: SystemStats? = null,
+
     val workflow: WorkflowFile = workflows.first(),
     val width: Int = 512,
     val height: Int = 512,
@@ -49,6 +46,19 @@ data class ImageGenerationUiState(
     val seed: Long = generateRandom16DigitNumber(),
     val isRandom : Boolean = true
 )
+
+data class ImageViewerUiState(
+    val images: List<String> = emptyList(),
+    val selected: Int = 0
+) {
+    fun getImage(): String {
+        return if(images.size > selected ){
+            images[selected]
+        } else{
+            ""
+        }
+    }
+}
 
 class ImageGenerationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
@@ -81,6 +91,10 @@ class MainViewModel(
     private val _queueUiState = MutableStateFlow(QueueUiState())
     val queueUiState: StateFlow<QueueUiState> = _queueUiState.asStateFlow()
 
+    //image viewer
+    private val _imageUiState = MutableStateFlow(ImageViewerUiState())
+    val imageUiState: StateFlow<ImageViewerUiState> = _imageUiState.asStateFlow()
+
 
     init {
         checkStatus()
@@ -93,6 +107,10 @@ class MainViewModel(
         }
     }
 
+    fun viewImage(images: List<String> = emptyList(), selected: Int = 0) {
+        _imageUiState.value = ImageViewerUiState(images, selected)
+    }
+
     fun updatePrompt(prompt: String){
         viewModelScope.launch {
             _uiState.update { it.copy(prompt = prompt) }
@@ -102,13 +120,6 @@ class MainViewModel(
     fun updateWorkflow(workflow: WorkflowFile){
         viewModelScope.launch {
             _uiState.update { it.copy(workflow = workflow) }
-        }
-    }
-
-
-    fun setCurrentImage(image: String?){
-        viewModelScope.launch {
-            _uiState.update { it.copy(image = image) }
         }
     }
 
@@ -145,21 +156,14 @@ class MainViewModel(
 
     fun generateImages() {
         viewModelScope.launch {
-
-            _uiState.update { it.copy(isLoading = true, error = null) }
             try {
-
                 val prompt = loadWorkflow()
-
                 Log.d("FluxApp", "prompt: $prompt")
-
-                val result = withContext(Dispatchers.IO) {
+                withContext(Dispatchers.IO) {
                     fluxAPI.generateImage(prompt)
                 }
-
-                _uiState.update { it.copy(images = result, isLoading = false) }
             } catch (e: Exception) {
-                _uiState.update { it.copy(error = e.message, isLoading = false) }
+                e.printStackTrace()
             }
         }
     }
@@ -255,6 +259,13 @@ class MainViewModel(
         viewModelScope.launch {
             fluxAPI.cancelWorkflow(workflow.id)
             loadQueue(showLoading = false)
+        }
+    }
+
+    fun deleteHistory(id: String) {
+        viewModelScope.launch {
+            fluxAPI.deleteHistory(id)
+            loadHistory()
         }
     }
 

@@ -120,28 +120,6 @@ class FluxAPI {
         return jsonResponse.prompt_id
     }
 
-    private suspend fun getHistory(promptId: String): PromptHistory {
-        val response = client.get("http://$serverAddress/history/$promptId")
-        val jsonResponse = response.bodyAsText()
-        Log.d("FluxAPI", "Received history response: $jsonResponse")
-        val json = Json { ignoreUnknownKeys = true } // Configure JSON to ignore unknown keys
-
-        // Parse the JSON response as a JsonObject
-        val historyJson = json.decodeFromString<JsonObject>(jsonResponse)
-        val historyData = mutableMapOf<String, PromptData>()
-        Log.d("FluxAPI", "historyJson $historyJson")
-        // Iterate through the dynamic keys
-        for ((key, value) in historyJson) {
-            Log.d("FluxAPI", "Received key: $key value: $value")
-
-
-            val outputData = json.decodeFromJsonElement<PromptData>(value)
-            historyData[key] = outputData
-        }
-
-        return PromptHistory(historyData)
-    }
-
     private val _progressUiState = MutableStateFlow(ProgressGenerationUIState())
     val progressUiState: StateFlow<ProgressGenerationUIState> = _progressUiState.asStateFlow()
 
@@ -149,7 +127,6 @@ class FluxAPI {
         return _progressUiState.value.copy(
             progress = message.value,
             maxProgress = message.max,
-            currentNode = message.node
         )
     }
 
@@ -179,13 +156,15 @@ class FluxAPI {
     private fun handlePromptMessage(message: WSMessage.PromptMessage): ProgressGenerationUIState {
         return _progressUiState.value.copy(
             promptId = message.promptId,
-            errors = message.nodeErrors
+            error = message.nodeErrors.map { "${it.key}: ${it.value}" }.joinToString(", ")
         )
     }
 
     private fun handleExecutionSuccessMessage(message: WSMessage.ExecutionSuccessMessage): ProgressGenerationUIState {
         return _progressUiState.value.copy(
-            statusMessage = "Execution completed at ${message.timestamp}"
+            statusMessage = "Execution completed at ${message.timestamp}",
+            executing = false
+
         )
     }
 
@@ -197,37 +176,17 @@ class FluxAPI {
     }
 
     private fun handleExecutingMessage(message: WSMessage.ExecutingMessage): ProgressGenerationUIState {
-        Log.d("FluxAPI", "Nodes before: ${_progressUiState.value.allNodes}")
-
-        val nodes = _progressUiState.value.allNodes.toMutableList().apply {
-            var found = false
-            val toRemove = mutableListOf<String>()
-            this.forEach { s ->
-                if(!found && s != message.node){
-                    toRemove.add(s)
-                } else if (s == message.node){
-                    found = true
-                }
-            }
-            removeAll(toRemove)
-        }.toList()
-        Log.d("FluxAPI", "Nodes after: ${nodes}")
-
-
         return _progressUiState.value.copy(
-            allNodes = nodes,
-            currentNode = message.node,
             statusMessage = "Executing on node ${message.node}"
         )
     }
 
-    suspend fun generateImage(prompt: PromptRequest): List<String> {
+    suspend fun generateImage(prompt: PromptRequest) {
         val promptId = queuePrompt(prompt)
-
+        Log.d("FluxAPI", "Requested prompt: $promptId")
         // Create a MutableStateFlow to keep track of when the queue is empty
         val queueStatusFlow = MutableStateFlow(false)
-        val allNodes = prompt.prompt.keys.toList()
-        _progressUiState.value =  ProgressGenerationUIState(allNodes = allNodes)
+        _progressUiState.value =  ProgressGenerationUIState(executing = true)
         // Start WebSocket connection
         client.webSocket(
             method = HttpMethod.Get,
@@ -267,23 +226,7 @@ class FluxAPI {
             }
         }
 
-        // Wait until the queue is empty
-        queueStatusFlow.first { it }
-
-        val historyResponse: PromptHistory = getHistory(promptId)
-        val history = historyResponse.outputs
-        val images = history.values.flatMap {
-            it.outputs.map { it.value }.flatMap { elem ->
-                elem.images.map { image ->
-                    getImage(image.filename, image.subfolder, image.type)
-                }.toMutableList()
-            }
-        }
-        Log.d("FluxAPI", "Images: ${images.size}")
-        return images
     }
-
-
 
     suspend fun checkSystemStats(): SystemStats? {
         Log.d("FluxAPI", "call checkSystemStats")
@@ -402,7 +345,8 @@ class FluxAPI {
             images = this.outputs.values.flatMap { it.images.filter { it.type == "output" }.map { getImage(it.filename,it.subfolder, it.type) } },
             success = this.status.status_str == "success",
             completed = this.status.completed,
-            prompt = prompt.toString().cleanHistoryPrompt()
+            prompt = prompt.toString().cleanHistoryPrompt(),
+            id = this.prompt[1].toString().cleanHistoryPrompt()
         )
     }
 

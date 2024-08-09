@@ -2,6 +2,7 @@ package com.eltonkola.comfyflux.app.drawer
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,7 +40,9 @@ import coil.compose.AsyncImage
 import com.eltonkola.comfyflux.app.MainViewModel
 import com.eltonkola.comfyflux.app.model.HistoryItem
 import com.eltonkola.comfyflux.ui.theme.Ikona
+import com.eltonkola.comfyflux.ui.theme.ikona.Cancel
 import com.eltonkola.comfyflux.ui.theme.ikona.Copy
+import com.eltonkola.comfyflux.ui.theme.ikona.Delete
 import com.eltonkola.comfyflux.ui.theme.ikona.Error
 import com.eltonkola.comfyflux.ui.theme.ikona.Image
 import com.eltonkola.comfyflux.ui.theme.ikona.Refresh
@@ -96,8 +99,14 @@ fun HistoryTab( viewModel: MainViewModel) {
                         modifier = Modifier.fillMaxSize()
                     ) {
 
-                        items(uiState.history) {
-                            HistoryRowUi(it)
+                        items(uiState.history) { row ->
+                            HistoryRowUi(row, onClick = {
+                                viewModel.viewImage(row.images, row.images.indexOf(it))
+                            },
+                                onDelete = {
+                                viewModel.deleteHistory(row.id)
+                                }
+                            )
                             Spacer(modifier = Modifier.size(1.dp))
                         }
 
@@ -110,7 +119,7 @@ fun HistoryTab( viewModel: MainViewModel) {
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun HistoryRowUi(item: HistoryItem) {
+fun HistoryRowUi(item: HistoryItem, onClick:(String) -> Unit, onDelete : () -> Unit) {
     val clipboardManager = LocalClipboardManager.current
         Column {
             Text(text = "Nr: ${item.images.size} success: ${item.success} - completed: ${item.completed}")
@@ -118,19 +127,23 @@ fun HistoryRowUi(item: HistoryItem) {
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 if(item.images.isNotEmpty()) {
-                    items(item.images) {
+                    items(item.images) { image ->
                         AsyncImage(
                             modifier = Modifier
                                 .size(120.dp)
                                 .clip(RoundedCornerShape(10.dp))
+                                .clickable {
+                                    onClick(image)
+                                }
                                 .background(MaterialTheme.colorScheme.secondary),
-                            model = item.images.first(),
+                            model = image,
                             contentDescription = null,
                         )
                     }
                 }else{
                  item{
-                  Box(modifier = Modifier.size(120.dp)
+                  Box(modifier = Modifier
+                      .size(120.dp)
                       .clip(RoundedCornerShape(10.dp))
                       .background(MaterialTheme.colorScheme.secondary),
                       contentAlignment = Alignment.Center
@@ -150,10 +163,20 @@ fun HistoryRowUi(item: HistoryItem) {
                             text = item.prompt,
                             fontSize = 10.sp
                         )
-                        IconButton(onClick = {
-                            clipboardManager.setText(AnnotatedString(item.prompt))
-                        }) {
-                            Icon(imageVector = Ikona.Copy, contentDescription = "copy", modifier = Modifier.size(24.dp))
+                        Column {
+
+
+                            IconButton(onClick = {
+                                clipboardManager.setText(AnnotatedString(item.prompt))
+                            }) {
+                                Icon(imageVector = Ikona.Copy, contentDescription = "copy", modifier = Modifier.size(24.dp))
+                            }
+
+                            IconButton(onClick = {
+                                onDelete()
+                            }) {
+                                Icon(imageVector = Ikona.Delete, contentDescription = "delete", modifier = Modifier.size(24.dp))
+                            }
                         }
                     }
                 }

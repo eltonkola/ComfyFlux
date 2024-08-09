@@ -17,7 +17,8 @@ data class HistoryItem(
     val images: List<String>,
     val success: Boolean,
     val completed: Boolean,
-    val prompt: String
+    val prompt: String,
+    val id: String
 )
 
 data class Queue(
@@ -35,10 +36,9 @@ data class ProgressGenerationUIState(
     val progress: Int = 0,
     val maxProgress: Int = 1,
     val queueRemaining: Int = 0,
-    val currentNode: String = "",
     val generatedImages: List<String> = emptyList(),
     val statusMessage: String = "",
-    val errors: Map<String, String> = emptyMap(),
-    val allNodes: List<String> = emptyList()
+    val error: String = "",
+    val executing: Boolean = false
 )
 

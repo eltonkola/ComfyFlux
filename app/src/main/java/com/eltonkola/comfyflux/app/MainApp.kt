@@ -23,15 +23,16 @@ fun MainApp(
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
+    val progressUiState by viewModel.progressUiState.collectAsState()
     val navController = rememberNavController()
 
     NavHost(navController = navController, startDestination = AppScreens.Main.screenName) {
         composable(AppScreens.Main.screenName) {
-            MainAppScreen(viewModel, uiState, navController)
+            MainAppScreen(viewModel, uiState, progressUiState, navController)
         }
         composable(AppScreens.ImageViewer.screenName)
         {
-            PhotoViewerScreen(viewModel, uiState, navController)
+            PhotoViewerScreen(viewModel, navController)
         }
         composable(AppScreens.Settings.screenName) {
             SettingsScreen(viewModel, uiState, navController)

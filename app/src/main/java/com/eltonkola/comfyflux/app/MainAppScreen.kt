@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.eltonkola.comfyflux.app.drawer.HistoryAndQueue
+import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.app.prompts.PromptSearch
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Create
@@ -49,6 +50,7 @@ import kotlinx.coroutines.launch
 fun MainAppScreen(
     viewModel: MainViewModel,
     uiState: ImageGenerationUiState,
+    progressUiState: ProgressGenerationUIState,
     navController: NavController
 ) {
 
@@ -143,7 +145,7 @@ fun MainAppScreen(
                 ExtendedFloatingActionButton(
                     containerColor = MaterialTheme.colorScheme.primary,
                     onClick = {
-                        if (!uiState.isLoading) {
+                        if (!progressUiState.executing) {
                             viewModel.generateImages()
                             keyboardController?.hide()
                         }
@@ -156,14 +158,14 @@ fun MainAppScreen(
                         modifier = Modifier.size(24.dp)
                     )
 
-                    if (uiState.isLoading) {
+                    if (progressUiState.executing) {
                         Text(text = "Generating...")
                     } else {
                         Text(text = "Create")
                     }
                 }
 
-                if(uiState.isLoading){
+                if(progressUiState.executing){
                     Spacer(modifier = Modifier.size(8.dp))
                     ExtendedFloatingActionButton(
                         containerColor = MaterialTheme.colorScheme.tertiary,
@@ -195,7 +197,7 @@ fun MainAppScreen(
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        CreateUi(uiState, viewModel, navController) {
+                        CreateUi(uiState, progressUiState,  viewModel, navController) {
                             scope.launch {
                                 drawerStateLeft.apply {
                                     if (isClosed) open() else close()

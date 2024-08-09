@@ -25,6 +25,7 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Tab
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.ArrowDown
 import com.eltonkola.comfyflux.ui.theme.ikona.Clean
@@ -60,12 +62,11 @@ import com.eltonkola.comfyflux.ui.theme.ikona.WorkflowIc
 @Composable
 fun CreateUi(
     uiState: ImageGenerationUiState,
+    progressUiState: ProgressGenerationUIState,
     viewModel: MainViewModel,
     navController: NavController,
     openWorkflows: () -> Unit
 ) {
-
-    val progressUiState by viewModel.progressUiState.collectAsState()
 
     Column(
         modifier = Modifier.fillMaxSize(),
@@ -74,11 +75,6 @@ fun CreateUi(
 
         ServerConnectionUi(viewModel = viewModel, uiState = uiState)
         Spacer(modifier = Modifier.height(16.dp))
-
-        Text(text = "Progress: ${progressUiState.progress} / ${progressUiState.maxProgress} - promptId: ${progressUiState.promptId}")
-        Text(text = "Current: ${progressUiState.currentNode} - Remaining Nodes: ${progressUiState.allNodes}")
-        Text(text = "statusMessage: ${progressUiState.statusMessage} - error: ${progressUiState.errors} - Remaining: ${progressUiState.queueRemaining} ")
-        Text(text = "generatedImages: ${progressUiState.generatedImages.size}")
 
         if (uiState.stats == null) {
             Text(text = "Please make sure your server in online, and in the same network, to be able to use this app.\nRemember, this us just a minimal front ent for simple flows.")
@@ -126,6 +122,11 @@ fun CreateUi(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+            LinearProgressIndicator(
+                progress = { progressUiState.progress / progressUiState.maxProgress.toFloat() },
+                modifier = Modifier.fillMaxWidth(),
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -134,9 +135,9 @@ fun CreateUi(
                 contentAlignment = Alignment.Center
             ) {
 
-                if (uiState.images.isNotEmpty()) {
-                    ImageGrid(images = uiState.images) {
-                        viewModel.setCurrentImage(it)
+                if (progressUiState.generatedImages.isNotEmpty()) {
+                    ImageGrid(images = progressUiState.generatedImages) {
+                        viewModel.viewImage(progressUiState.generatedImages, progressUiState.generatedImages.indexOf(it))
                         navController.navigate(AppScreens.ImageViewer.screenName)
                     }
                 } else {
@@ -147,10 +148,30 @@ fun CreateUi(
                     )
                 }
 
-                if (uiState.isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(64.dp)
-                    )
+                if (progressUiState.executing) {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(64.dp),
+                            color = MaterialTheme.colorScheme.onSecondary
+                        )
+                        Spacer(modifier = Modifier.height(26.dp))
+                        if(progressUiState.statusMessage.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(text = progressUiState.statusMessage, color = MaterialTheme.colorScheme.onSecondary)
+                        }
+                        if(progressUiState.statusMessage.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Text(text = progressUiState.error, color = MaterialTheme.colorScheme.onSecondary)
+                        }
+
+                    }
+
+
                 }
             }
 
@@ -168,7 +189,7 @@ fun CreateUi(
                     }
                 }
                 when (tabIndex) {
-                    0 -> PromptTab(uiState, viewModel)
+                    0 -> PromptTab(uiState, progressUiState, viewModel)
                     1 -> SizeTab(uiState, viewModel)
                     2 -> MoreTab(uiState, viewModel)
                 }
@@ -176,8 +197,8 @@ fun CreateUi(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            if (uiState.error != null) {
-                Text("Error: ${uiState.error}")
+            if (progressUiState.error.isNotEmpty()) {
+                Text("Error: ${progressUiState.error}")
             }
 
         }
@@ -185,7 +206,9 @@ fun CreateUi(
 }
 
 @Composable
-fun PromptTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
+fun PromptTab(uiState: ImageGenerationUiState,
+              progressUiState : ProgressGenerationUIState,
+              viewModel: MainViewModel) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
@@ -209,7 +232,7 @@ fun PromptTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
             keyboardActions = KeyboardActions(
                 onDone = {
                     keyboardController?.hide()
-                    if (!uiState.isLoading) {
+                    if (! progressUiState.executing) {
                         viewModel.generateImages()
                     }
                 }

@@ -22,6 +22,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,9 +50,10 @@ import java.net.URL
 @Composable
 fun PhotoViewerScreen(
     viewModel: MainViewModel,
-    uiState: ImageGenerationUiState,
     navController: NavController
 ) {
+
+    val uiState by viewModel.imageUiState.collectAsState()
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -66,7 +69,7 @@ fun PhotoViewerScreen(
                         coroutineScope.launch {
                             saveImageToDownloads(
                                 context,
-                                uiState.image!!,
+                                uiState.getImage(),
                                 "flux_image_${System.currentTimeMillis()}.png",
                                 true
                             )
@@ -82,7 +85,7 @@ fun PhotoViewerScreen(
                         coroutineScope.launch {
                             saveImageToDownloads(
                                 context,
-                                uiState.image!!,
+                                uiState.getImage(),
                                 "flux_image_${System.currentTimeMillis()}.png",
                                 false
                             )
@@ -115,7 +118,7 @@ fun PhotoViewerScreen(
 
             AsyncImage(
                 modifier = Modifier.fillMaxSize(),
-                model = uiState.image!!,
+                model = uiState.getImage(),
                 contentDescription = null,
                 contentScale = ContentScale.Fit
             )
