@@ -24,3 +24,9 @@ data class SystemStats(
         val index : Int? = null
     )
 }
+
+@Serializable
+data class PromptRequest(
+    val client_id: String,
+    val prompt : Workflow
+)

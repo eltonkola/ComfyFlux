@@ -41,6 +41,7 @@ import com.eltonkola.comfyflux.ui.theme.ikona.History
 import com.eltonkola.comfyflux.ui.theme.ikona.Menu
 import com.eltonkola.comfyflux.ui.theme.ikona.Search
 import com.eltonkola.comfyflux.ui.theme.ikona.Settings
+import com.eltonkola.comfyflux.ui.theme.ikona.Stop
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -161,6 +162,24 @@ fun MainAppScreen(
                         Text(text = "Create")
                     }
                 }
+
+                if(uiState.isLoading){
+                    Spacer(modifier = Modifier.size(8.dp))
+                    ExtendedFloatingActionButton(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        onClick = {
+                            viewModel.interruptImages()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Ikona.Stop,
+                            contentDescription = "Stop",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(text = "Stop")
+                    }
+                }
+
             }
 
         }

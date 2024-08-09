@@ -321,6 +321,14 @@ class FluxAPI {
         )
     }
 
+    suspend fun interrupt() {
+        withContext(Dispatchers.IO) {
+            val response = client.post("http://$serverAddress/interrupt")
+            val responseBody = response.bodyAsText()
+            Log.d("FluxAPI", "Received interrupt: $responseBody")
+        }
+    }
+
 
 }
 

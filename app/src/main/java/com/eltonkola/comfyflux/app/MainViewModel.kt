@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.eltonkola.comfyflux.app.model.HistoryUiState
 import com.eltonkola.comfyflux.app.model.Node
 import com.eltonkola.comfyflux.app.model.PromptInputs
+import com.eltonkola.comfyflux.app.model.PromptRequest
 import com.eltonkola.comfyflux.app.model.Queue
 import com.eltonkola.comfyflux.app.model.QueueUiState
 import com.eltonkola.comfyflux.app.model.SizeInputs
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
 import java.io.InputStream
@@ -136,14 +138,21 @@ class MainViewModel(
         }
     }
 
+
+    fun interruptImages() {
+        viewModelScope.launch {
+            fluxAPI.interrupt()
+        }
+    }
+
     fun generateImages() {
         viewModelScope.launch {
 
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
 
-                val prompt = loadWorkflow()
-
+                val promptRequest = loadWorkflow()
+                val prompt = Json.encodeToString(promptRequest)
 
                 Log.d("FluxApp", "prompt: $prompt")
 
@@ -180,7 +189,7 @@ class MainViewModel(
 
     }
 
-    private fun loadWorkflow() : String {
+    private fun loadWorkflow() : PromptRequest {
 
         val seed = if(uiState.value.isRandom) {
             val newSeed = generateRandom16DigitNumber()
@@ -205,13 +214,7 @@ class MainViewModel(
         workflow.updatePrompt(prompt = uiState.value.prompt.cleanPrompt())
 
         workflow.updateSeed(seed = seed)
-
-        val prompt = Json.encodeToJsonElement(workflow)
-
-        return """{
-  "client_id": "${fluxAPI.clientId}",
-  "prompt": $prompt
-}""".trimIndent()
+        return PromptRequest(fluxAPI.clientId, workflow)
     }
 
     fun randomSeed() {
