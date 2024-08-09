@@ -1,18 +1,15 @@
 package com.eltonkola.comfyflux.app
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.eltonkola.comfyflux.app.model.HistoryUiState
-import com.eltonkola.comfyflux.app.model.Node
-import com.eltonkola.comfyflux.app.model.PromptInputs
+import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.app.model.PromptRequest
 import com.eltonkola.comfyflux.app.model.Queue
 import com.eltonkola.comfyflux.app.model.QueueUiState
-import com.eltonkola.comfyflux.app.model.SizeInputs
 import com.eltonkola.comfyflux.app.model.SystemStats
 import com.eltonkola.comfyflux.app.model.Workflow
 import com.eltonkola.comfyflux.app.model.WorkflowFile
@@ -30,9 +27,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
 import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.random.Random
@@ -74,6 +69,9 @@ class MainViewModel(
     //main screen state
     private val _uiState = MutableStateFlow(ImageGenerationUiState())
     val uiState: StateFlow<ImageGenerationUiState> = _uiState.asStateFlow()
+
+    val progressUiState: StateFlow<ProgressGenerationUIState> = fluxAPI.progressUiState
+
 
     //history state
     private val _historyUiState = MutableStateFlow(HistoryUiState())
@@ -151,13 +149,12 @@ class MainViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
             try {
 
-                val promptRequest = loadWorkflow()
-                val prompt = Json.encodeToString(promptRequest)
+                val prompt = loadWorkflow()
 
                 Log.d("FluxApp", "prompt: $prompt")
 
                 val result = withContext(Dispatchers.IO) {
-                    fluxAPI.getImages(prompt)
+                    fluxAPI.generateImage(prompt)
                 }
 
                 _uiState.update { it.copy(images = result, isLoading = false) }
@@ -214,6 +211,7 @@ class MainViewModel(
         workflow.updatePrompt(prompt = uiState.value.prompt.cleanPrompt())
 
         workflow.updateSeed(seed = seed)
+
         return PromptRequest(fluxAPI.clientId, workflow)
     }
 

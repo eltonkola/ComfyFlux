@@ -29,3 +29,16 @@ data class Queue(
         val prompt: String
     )
 }
+
+data class ProgressGenerationUIState(
+    val promptId: String="",
+    val progress: Int = 0,
+    val maxProgress: Int = 1,
+    val queueRemaining: Int = 0,
+    val currentNode: String = "",
+    val generatedImages: List<String> = emptyList(),
+    val statusMessage: String = "",
+    val errors: Map<String, String> = emptyMap(),
+    val allNodes: List<String> = emptyList()
+)
+

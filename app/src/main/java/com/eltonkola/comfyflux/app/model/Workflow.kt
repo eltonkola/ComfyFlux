@@ -132,11 +132,11 @@ fun Workflow.updatePrompt(prompt: String ){
 }
 
 
-fun updateSeed(node: Node<JsonElement>, newSeed: Long): Node<JsonElement> {
+fun updateSeed(node: Node<JsonElement>, seedKey: String, newSeed: Long): Node<JsonElement> {
     val currentInputs = node.inputs.jsonObject
     val updatedInputs = buildJsonObject {
         currentInputs.forEach { (key, value) ->
-            if (key == "seed") {
+            if (key == seedKey) {
                 put(key, JsonPrimitive(newSeed))
             } else {
                 put(key, value)
@@ -147,10 +147,10 @@ fun updateSeed(node: Node<JsonElement>, newSeed: Long): Node<JsonElement> {
 }
 
 fun Workflow.updateSeed(seed: Long ){
-    this.updateNode(Workflow.KSAMPLER) { node ->
-        updateSeed(node, seed)
+    this.updateNode(Workflow.KSAMPLER, ) { node ->
+        updateSeed(node, "seed", seed)
     }
-    this.updateNode(Workflow.RANDOMNOISE) { node ->
-        updateSeed(node, seed)
+    this.updateNode(Workflow.RANDOMNOISE, ) { node ->
+        updateSeed(node, "noise_seed", seed)
     }
 }

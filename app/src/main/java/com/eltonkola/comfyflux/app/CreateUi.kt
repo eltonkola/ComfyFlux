@@ -32,6 +32,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -64,6 +65,8 @@ fun CreateUi(
     openWorkflows: () -> Unit
 ) {
 
+    val progressUiState by viewModel.progressUiState.collectAsState()
+
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -71,6 +74,11 @@ fun CreateUi(
 
         ServerConnectionUi(viewModel = viewModel, uiState = uiState)
         Spacer(modifier = Modifier.height(16.dp))
+
+        Text(text = "Progress: ${progressUiState.progress} / ${progressUiState.maxProgress} - promptId: ${progressUiState.promptId}")
+        Text(text = "Current: ${progressUiState.currentNode} - Remaining Nodes: ${progressUiState.allNodes}")
+        Text(text = "statusMessage: ${progressUiState.statusMessage} - error: ${progressUiState.errors} - Remaining: ${progressUiState.queueRemaining} ")
+        Text(text = "generatedImages: ${progressUiState.generatedImages.size}")
 
         if (uiState.stats == null) {
             Text(text = "Please make sure your server in online, and in the same network, to be able to use this app.\nRemember, this us just a minimal front ent for simple flows.")
@@ -422,7 +430,11 @@ fun SeedSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
             value = uiState.seed.toString(),
             onValueChange = {
                 if (it.all { char -> char.isDigit() }) {
-                    viewModel.setSeed(it.toLong(), uiState.isRandom)
+                    try {
+                        viewModel.setSeed(it.toLong(), uiState.isRandom)
+                    } catch (e: Exception){
+                      //empty seed, dont change it
+                    }
                 }
             },
             label = { Text("Seed value") },
