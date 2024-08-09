@@ -1,9 +1,9 @@
 {
   "5": {
     "inputs": {
-      "width": __width__,
-      "height": __height__,
-      "batch_size": __batch_size__
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
     },
     "class_type": "EmptyLatentImage",
     "_meta": {
@@ -12,7 +12,7 @@
   },
   "6": {
     "inputs": {
-      "text": "__prompt__",
+      "text": "a cat with a hat",
       "clip": [
         "11",
         0
@@ -152,7 +152,7 @@
   },
   "25": {
     "inputs": {
-      "noise_seed": __seed__
+      "noise_seed": 967416142058612
     },
     "class_type": "RandomNoise",
     "_meta": {

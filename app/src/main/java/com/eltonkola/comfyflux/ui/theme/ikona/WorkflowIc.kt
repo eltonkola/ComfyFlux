@@ -12,7 +12,7 @@ import com.eltonkola.comfyflux.ui.theme.Ikona
 
 private var _icon: ImageVector? = null
 
-public val Ikona.Workflow: ImageVector
+public val Ikona.WorkflowIc: ImageVector
     get() {
         if (_icon != null) {
             return _icon!!

@@ -1,12 +1,9 @@
 package com.eltonkola.comfyflux.app
 
-import android.widget.Space
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,12 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MailOutline
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -28,17 +20,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.eltonkola.comfyflux.app.model.Workflow
+import com.eltonkola.comfyflux.app.model.WorkflowFile
 import com.eltonkola.comfyflux.app.model.workflows
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.ArrowRight
-import com.eltonkola.comfyflux.ui.theme.ikona.Workflow
+import com.eltonkola.comfyflux.ui.theme.ikona.WorkflowIc
 
 @Composable
-fun WorkflowsUi(onSelect: (Workflow) -> Unit, uiState: ImageGenerationUiState) {
+fun WorkflowsUi(onSelect: (WorkflowFile) -> Unit, uiState: ImageGenerationUiState) {
     Column(
         modifier = Modifier.fillMaxSize().padding(8.dp)) {
         Text(
@@ -66,7 +56,7 @@ fun WorkflowsUi(onSelect: (Workflow) -> Unit, uiState: ImageGenerationUiState) {
 }
 
 @Composable
-fun WorkflowRow(workflow: Workflow, selected: Boolean,  onSelect: (Workflow) -> Unit){
+fun WorkflowRow(workflow: WorkflowFile, selected: Boolean, onSelect: (WorkflowFile) -> Unit){
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -83,7 +73,7 @@ fun WorkflowRow(workflow: Workflow, selected: Boolean,  onSelect: (Workflow) -> 
     ) {
         Icon(
             modifier = Modifier.padding(8.dp).size(40.dp),
-            imageVector = Ikona.Workflow,
+            imageVector = Ikona.WorkflowIc,
             contentDescription = null
         )
         Column (

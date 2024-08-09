@@ -188,9 +188,10 @@ class FluxAPI {
                 if (frame is Frame.Text) {
                     val messageText = frame.readText()
                     Log.d("FluxAPI", "Received websocket raw: $messageText")
+
                     val json = Json { ignoreUnknownKeys = true }
                     val message = json.decodeFromString<WebSocketMessage>(messageText)
-                    Log.d("FluxAPI", "Received websocket message: $message")
+                    //Log.d("FluxAPI", "Received websocket message: $message")
 
                     if (message.type == "status") {
                         val status = message.data?.status

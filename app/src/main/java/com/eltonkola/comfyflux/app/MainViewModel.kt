@@ -6,12 +6,18 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.eltonkola.comfyflux.R
 import com.eltonkola.comfyflux.app.model.HistoryUiState
+import com.eltonkola.comfyflux.app.model.Node
+import com.eltonkola.comfyflux.app.model.PromptInputs
 import com.eltonkola.comfyflux.app.model.Queue
 import com.eltonkola.comfyflux.app.model.QueueUiState
+import com.eltonkola.comfyflux.app.model.SizeInputs
 import com.eltonkola.comfyflux.app.model.SystemStats
 import com.eltonkola.comfyflux.app.model.Workflow
+import com.eltonkola.comfyflux.app.model.WorkflowFile
+import com.eltonkola.comfyflux.app.model.updatePrompt
+import com.eltonkola.comfyflux.app.model.updateSeed
+import com.eltonkola.comfyflux.app.model.updateSizeAndBatch
 import com.eltonkola.comfyflux.app.model.workflows
 import com.eltonkola.comfyflux.app.netwrok.DEFAULT_URL
 import com.eltonkola.comfyflux.app.netwrok.FluxAPI
@@ -23,6 +29,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.random.Random
@@ -37,7 +45,7 @@ data class ImageGenerationUiState(
 
     val loadingStats: Boolean = false,
     val stats: SystemStats? = null,
-    val workflow: Workflow = workflows.first(),
+    val workflow: WorkflowFile = workflows.first(),
     val width: Int = 512,
     val height: Int = 512,
     val batchSize: Int = 1,
@@ -91,7 +99,7 @@ class MainViewModel(
         }
     }
 
-    fun updateWorkflow(workflow: Workflow){
+    fun updateWorkflow(workflow: WorkflowFile){
         viewModelScope.launch {
             _uiState.update { it.copy(workflow = workflow) }
         }
@@ -173,9 +181,7 @@ class MainViewModel(
     }
 
     private fun loadWorkflow() : String {
-        val workflow = _uiState.value.workflow
-        val promptRaw = context.resources.openRawResource(workflow.workflowRes)
-        var prompt = promptRaw.readTextAndClose()
+
         val seed = if(uiState.value.isRandom) {
             val newSeed = generateRandom16DigitNumber()
             _uiState.update { it.copy(seed = newSeed) }
@@ -183,11 +189,24 @@ class MainViewModel(
         } else {
             uiState.value.seed
         }
-        prompt = prompt.replace("__prompt__", uiState.value.prompt.cleanPrompt())
-        prompt = prompt.replace("__width__", uiState.value.width.toString())
-        prompt = prompt.replace("__height__", uiState.value.height.toString())
-        prompt = prompt.replace("__batch_size__", uiState.value.batchSize.toString())
-        prompt = prompt.replace("__seed__", seed.toString())
+
+        val workflowConfig = _uiState.value.workflow
+        val workflowRaw = context.resources.openRawResource(workflowConfig.workflowRes)
+        val workflowInput = workflowRaw.readTextAndClose()
+        val workflow = Json.decodeFromString<Workflow>(workflowInput)
+
+
+        workflow.updateSizeAndBatch(
+            width = uiState.value.width,
+            height = uiState.value.height,
+            batchSize = uiState.value.batchSize
+        )
+
+        workflow.updatePrompt(prompt = uiState.value.prompt.cleanPrompt())
+
+        workflow.updateSeed(seed = seed)
+
+        val prompt = Json.encodeToJsonElement(workflow)
 
         return """{
   "client_id": "${fluxAPI.clientId}",

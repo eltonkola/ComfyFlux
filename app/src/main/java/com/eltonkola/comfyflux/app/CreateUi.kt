@@ -54,7 +54,7 @@ import com.eltonkola.comfyflux.ui.theme.ikona.Paste
 import com.eltonkola.comfyflux.ui.theme.ikona.Promp
 import com.eltonkola.comfyflux.ui.theme.ikona.Refresh
 import com.eltonkola.comfyflux.ui.theme.ikona.Seed
-import com.eltonkola.comfyflux.ui.theme.ikona.Workflow
+import com.eltonkola.comfyflux.ui.theme.ikona.WorkflowIc
 
 @Composable
 fun CreateUi(
@@ -98,7 +98,7 @@ fun CreateUi(
 
                 Icon(
                     modifier = Modifier.size(24.dp),
-                    imageVector = Ikona.Workflow,
+                    imageVector = Ikona.WorkflowIc,
                     contentDescription = null
                 )
 
