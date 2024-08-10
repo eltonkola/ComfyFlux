@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.eltonkola.comfyflux.app.MainViewModel
+import com.eltonkola.comfyflux.app.components.LoadingUi
 import com.eltonkola.comfyflux.app.model.HistoryItem
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Cancel
@@ -79,7 +82,7 @@ fun HistoryTab( viewModel: MainViewModel) {
             .padding(it)
             .fillMaxSize()) {
             if (uiState.loading) {
-                CircularProgressIndicator()
+                LoadingUi(modifier = Modifier.fillMaxWidth().height(200.dp))
             } else if (uiState.error) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -160,14 +163,14 @@ fun HistoryRowUi(item: HistoryItem, onClick:(String) -> Unit, onDelete : () -> U
                     Row {
                         Text(
                             modifier = Modifier.width(240.dp),
-                            text = item.prompt,
+                            text = item.prompt.getPrompt(),
                             fontSize = 10.sp
                         )
                         Column {
 
 
                             IconButton(onClick = {
-                                clipboardManager.setText(AnnotatedString(item.prompt))
+                                clipboardManager.setText(AnnotatedString(item.prompt.getPrompt()))
                             }) {
                                 Icon(imageVector = Ikona.Copy, contentDescription = "copy", modifier = Modifier.size(24.dp))
                             }

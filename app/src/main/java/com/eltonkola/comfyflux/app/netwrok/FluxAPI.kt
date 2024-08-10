@@ -7,6 +7,7 @@ import com.eltonkola.comfyflux.app.model.PromptRequest
 import com.eltonkola.comfyflux.app.model.Queue
 import com.eltonkola.comfyflux.app.model.SystemStats
 import com.eltonkola.comfyflux.app.model.WSMessage
+import com.eltonkola.comfyflux.app.model.Workflow
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -24,6 +25,7 @@ import io.ktor.util.InternalAPI
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -281,7 +283,10 @@ class FluxAPI {
     }
 
     private fun JsonElement.toQueueWorkflow() : Queue.Workflow {
-        val prompt = this.jsonArray[2].jsonObject["6"]!!.jsonObject["inputs"]!!.jsonObject["text"].toString().cleanHistoryPrompt()
+
+        val workflow = Json.decodeFromString<Workflow>(this.jsonArray[2].toString())
+
+        val prompt = workflow.getPrompt()
         val id = this.jsonArray[1].toString().replace("\"", "")
 
         Log.d("FluxAPI", "call toQueueWorkflow: $this")
@@ -339,13 +344,13 @@ class FluxAPI {
 
     private fun HistoryResponse.normalize(): HistoryItem {
 
-        val prompt = this.prompt[2].jsonObject["6"]!!.jsonObject["inputs"]!!.jsonObject["text"]
+        val prompt = Json.decodeFromString<Workflow>(this.prompt[2].toString())
 
         return HistoryItem(
             images = this.outputs.values.flatMap { it.images.filter { it.type == "output" }.map { getImage(it.filename,it.subfolder, it.type) } },
             success = this.status.status_str == "success",
             completed = this.status.completed,
-            prompt = prompt.toString().cleanHistoryPrompt(),
+            prompt = prompt,
             id = this.prompt[1].toString().cleanHistoryPrompt()
         )
     }

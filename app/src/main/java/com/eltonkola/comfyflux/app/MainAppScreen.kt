@@ -142,33 +142,10 @@ fun MainAppScreen(
                     }
                 }
                 Spacer(modifier = Modifier.size(8.dp))
-                ExtendedFloatingActionButton(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    onClick = {
-                        if (!progressUiState.executing) {
-                            viewModel.generateImages()
-                            keyboardController?.hide()
-                        }
-                    },
-
-                    ) {
-                    Icon(
-                        imageVector = Ikona.Create,
-                        contentDescription = "Create",
-                        modifier = Modifier.size(24.dp)
-                    )
-
-                    if (progressUiState.executing) {
-                        Text(text = "Generating...")
-                    } else {
-                        Text(text = "Create")
-                    }
-                }
 
                 if(progressUiState.executing){
-                    Spacer(modifier = Modifier.size(8.dp))
                     ExtendedFloatingActionButton(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        containerColor = MaterialTheme.colorScheme.primary,
                         onClick = {
                             viewModel.interruptImages()
                         }
@@ -179,6 +156,22 @@ fun MainAppScreen(
                             modifier = Modifier.size(24.dp)
                         )
                         Text(text = "Stop")
+                    }
+                }else{
+                    ExtendedFloatingActionButton(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        onClick = {
+                                viewModel.generateImages()
+                                keyboardController?.hide()
+                        },
+
+                        ) {
+                        Icon(
+                            imageVector = Ikona.Create,
+                            contentDescription = "Create",
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(text = "Create")
                     }
                 }
 

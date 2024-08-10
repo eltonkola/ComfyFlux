@@ -78,6 +78,11 @@ class Workflow : MutableMap<String, Node<JsonElement>> by mutableMapOf() {
     fun toJson(): String {
         return Json.encodeToString(this)
     }
+
+    fun getPrompt(): String {
+        val prompt = this.getTypedNode<PromptInputs>(PROMPT)
+        return prompt!!.inputs.text
+    }
 }
 
 @Serializable

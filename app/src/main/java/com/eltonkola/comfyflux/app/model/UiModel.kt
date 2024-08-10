@@ -17,7 +17,7 @@ data class HistoryItem(
     val images: List<String>,
     val success: Boolean,
     val completed: Boolean,
-    val prompt: String,
+    val prompt: Workflow,
     val id: String
 )
 
