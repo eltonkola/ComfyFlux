@@ -254,15 +254,19 @@ class MainViewModel(
 
     //history and queue
 
-    fun loadHistory() {
-        _historyUiState.update { it.copy(loading = true) }
+    fun loadHistory(silentUpdate: Boolean = false) {
+        if(silentUpdate) {
+            _historyUiState.update { it.copy(silentLoading = true) }
+        }else{
+            _historyUiState.update { it.copy(loading = true) }
+        }
         viewModelScope.launch {
             try{
                 val history = fluxAPI.fetchHistory()
                 Log.d("HistoryQueueViewModel", "history: ${history.size}")
-                _historyUiState.update { it.copy(loading = false, history = history.reversed(), error = false) }
+                _historyUiState.update { it.copy(loading = false, history = history.reversed(), error = false, silentLoading = false) }
             }catch (e: Exception){
-                _historyUiState.update { it.copy(loading = false, error = true) }
+                _historyUiState.update { it.copy(loading = false, error = true, silentLoading =  false) }
             }
             checkStatus()
         }
@@ -295,7 +299,7 @@ class MainViewModel(
     fun deleteHistory(id: String) {
         viewModelScope.launch {
             fluxAPI.deleteHistory(id)
-            loadHistory()
+            loadHistory(silentUpdate = true)
         }
     }
 

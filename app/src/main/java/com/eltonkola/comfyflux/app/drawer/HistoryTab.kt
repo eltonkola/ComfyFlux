@@ -69,6 +69,11 @@ fun HistoryTab( viewModel: MainViewModel, navController: NavController) {
             TopAppBar(
                 title = { Text("All images on server") },
                 actions = {
+                    if(uiState.silentLoading){
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                     IconButton(onClick = { viewModel.loadHistory() }) {
                         Icon(
                             imageVector = Ikona.Refresh,
@@ -84,7 +89,9 @@ fun HistoryTab( viewModel: MainViewModel, navController: NavController) {
             .padding(it)
             .fillMaxSize()) {
             if (uiState.loading) {
-                LoadingUi(modifier = Modifier.fillMaxWidth().height(200.dp))
+                LoadingUi(modifier = Modifier
+                    .fillMaxWidth()
+                    .height(200.dp))
             } else if (uiState.error) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally

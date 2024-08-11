@@ -4,7 +4,8 @@ package com.eltonkola.comfyflux.app.model
 data class HistoryUiState(
     val history: List<HistoryItem> = emptyList(),
     val loading: Boolean = true,
-    val error: Boolean = false
+    val error: Boolean = false,
+    val silentLoading : Boolean = false
 )
 
 data class QueueUiState(
