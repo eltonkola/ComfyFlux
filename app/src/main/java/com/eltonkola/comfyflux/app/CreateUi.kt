@@ -46,6 +46,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
@@ -150,8 +151,18 @@ fun CreateUi(
                         tint = MaterialTheme.colorScheme.onSecondary
                     )
                 }
+                val timer by viewModel.timer.collectAsState()
 
                 if (progressUiState.executing) {
+
+                    Text(
+                        text = timer,
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 22.dp).fillMaxWidth()
+                    )
+
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,

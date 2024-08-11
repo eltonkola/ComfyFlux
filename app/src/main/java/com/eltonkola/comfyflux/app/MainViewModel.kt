@@ -29,6 +29,7 @@ import com.eltonkola.comfyflux.app.netwrok.DEFAULT_URL
 import com.eltonkola.comfyflux.app.netwrok.FluxAPI
 import com.eltonkola.comfyflux.app.netwrok.GroqAPI
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -178,6 +179,8 @@ class MainViewModel(
 
     fun generateImages() {
         viewModelScope.launch {
+            resetTimer()
+            startTimer()
             try {
                 val prompt = loadWorkflow()
                 Log.d("FluxApp", "prompt: $prompt")
@@ -188,6 +191,7 @@ class MainViewModel(
             } catch (e: Exception) {
                 e.printStackTrace()
             }
+            stopTimer()
         }
     }
 
@@ -300,6 +304,48 @@ class MainViewModel(
             val prompt = repository.randomPrompt()
             updatePrompt(prompt)
         }
+    }
+
+
+    //show a timer for the image generation
+    private val _timer = MutableStateFlow("00:00")
+    val timer: StateFlow<String> = _timer
+
+    private var running = false
+    private var elapsedTime = 0L
+
+    private fun startTimer() {
+        if (running) return
+        running = true
+        viewModelScope.launch {
+            while (running) {
+                delay(1000) // Update every second
+                elapsedTime += 1000 // Increment by 1 second
+                _timer.value = formatTime(elapsedTime)
+            }
+        }
+    }
+
+    private fun stopTimer() {
+        running = false
+    }
+
+    private fun resetTimer() {
+        running = false
+        elapsedTime = 0L
+        _timer.value = formatTime(elapsedTime)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        resetTimer()
+    }
+
+    @SuppressLint("DefaultLocale")
+    private fun formatTime(time: Long): String {
+        val minutes = (time / 1000) / 60
+        val seconds = (time / 1000) % 60
+        return String.format("%02d:%02d", minutes, seconds)
     }
 
 
