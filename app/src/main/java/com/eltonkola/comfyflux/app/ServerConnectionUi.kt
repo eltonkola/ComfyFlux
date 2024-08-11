@@ -50,7 +50,7 @@ fun ServerConnectionUi(viewModel: MainViewModel, uiState: ImageGenerationUiState
             )
         },
         supportingText = {
-            val supportingText = if (uiState.loadingStats) {
+            val supportingText = if (uiState.loadingStats && uiState.stats == null) {
                 "Connecting..."
             } else if (uiState.stats == null) {
                 "Cant reach the server!"
@@ -69,37 +69,40 @@ fun ServerConnectionUi(viewModel: MainViewModel, uiState: ImageGenerationUiState
                         modifier = Modifier
                             .padding(top = 4.dp)
                             .align(Alignment.TopEnd),
-                        color = Color.DarkGray,
-                        trackColor = Color.Gray,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.6f),
+                        trackColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
                     )
 
                 }
             }
         },
         trailingIcon = {
-            if (uiState.loadingStats) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp)
-                )
-            } else {
-                val bgColor = if (uiState.stats == null) Color.Red else Color.Green
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.primary,
-                            shape = CircleShape
-                        )
-                        .background(color = bgColor, shape = CircleShape)
-                ) {
-                    IconButton(onClick = { viewModel.checkStatus() }) {
-                        Icon(
-                            modifier = Modifier.size(16.dp),
-                            imageVector = Ikona.Refresh,
-                            contentDescription = "Connect",
-                            tint =  MaterialTheme.colorScheme.primary
-                        )
+            Box(modifier = Modifier.size(24.dp)) {
+                if (uiState.loadingStats) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp)
+                    )
+                } else {
+                    val bgColor =
+                        if (uiState.stats == null) MaterialTheme.colorScheme.error else Color.Green
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                shape = CircleShape
+                            )
+                            .background(color = bgColor, shape = CircleShape)
+                    ) {
+                        IconButton(onClick = { viewModel.checkStatus() }) {
+                            Icon(
+                                modifier = Modifier.size(16.dp),
+                                imageVector = Ikona.Refresh,
+                                contentDescription = "Connect",
+                                tint = MaterialTheme.colorScheme.onTertiaryContainer
+                            )
+                        }
                     }
                 }
             }

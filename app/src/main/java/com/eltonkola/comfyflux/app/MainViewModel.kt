@@ -1,10 +1,18 @@
 package com.eltonkola.comfyflux.app
 
+import android.annotation.SuppressLint
+import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
+import com.eltonkola.comfyflux.app.data.PromptRepo
 import com.eltonkola.comfyflux.app.model.HistoryUiState
 import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.app.model.PromptRequest
@@ -24,10 +32,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import okhttp3.internal.applyConnectionSpec
 import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.random.Random
@@ -52,21 +62,27 @@ data class ImageViewerUiState(
     val selected: Int = 0
 )
 
-class ImageGenerationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
+class MainViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return MainViewModel(context) as T
+            return MainViewModel(application) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
 
 class MainViewModel(
-    private val context: Context,
+    private val applicationContext: Application,
     private val fluxAPI: FluxAPI = FluxAPI(),
-    private val groqAPI: GroqAPI = GroqAPI()
-) : ViewModel() {
+    private val groqAPI: GroqAPI = GroqAPI(),
+    ) : AndroidViewModel(applicationContext) {
+
+    private val repository = PromptRepo(applicationContext)
+    //prompt search
+    private val _pagingDataFlow = MutableStateFlow<PagingData<String>>(PagingData.empty())
+    val pagingDataFlow: StateFlow<PagingData<String>> = _pagingDataFlow
+
 
     //main screen state
     private val _uiState = MutableStateFlow(ImageGenerationUiState())
@@ -90,6 +106,19 @@ class MainViewModel(
 
     init {
         checkStatus()
+        searchLines("")
+    }
+
+
+    fun searchLines(query: String) {
+        viewModelScope.launch {
+            Pager(
+                config = PagingConfig(pageSize = 100),
+                pagingSourceFactory = { repository.getPagingSource(query) }
+            ).flow.cachedIn(viewModelScope).collectLatest {
+                _pagingDataFlow.value = it
+            }
+        }
     }
 
     fun updateSeverUrl(url: String){
@@ -143,6 +172,7 @@ class MainViewModel(
     fun interruptImages() {
         viewModelScope.launch {
             fluxAPI.interrupt()
+            checkStatus()
         }
     }
 
@@ -154,6 +184,7 @@ class MainViewModel(
                 withContext(Dispatchers.IO) {
                     fluxAPI.generateImage(prompt)
                 }
+                checkStatus()
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -193,7 +224,7 @@ class MainViewModel(
         }
 
         val workflowConfig = _uiState.value.workflow
-        val workflowRaw = context.resources.openRawResource(workflowConfig.workflowRes)
+        val workflowRaw = applicationContext.resources.openRawResource(workflowConfig.workflowRes)
         val workflowInput = workflowRaw.readTextAndClose()
         val workflow = Json.decodeFromString<Workflow>(workflowInput)
 
@@ -229,6 +260,7 @@ class MainViewModel(
             }catch (e: Exception){
                 _historyUiState.update { it.copy(loading = false, error = true) }
             }
+            checkStatus()
         }
     }
 
@@ -244,6 +276,7 @@ class MainViewModel(
             }catch (e: Exception){
                 _queueUiState.update { it.copy(loading = false, error = true) }
             }
+            checkStatus()
         }
     }
 
@@ -251,6 +284,7 @@ class MainViewModel(
         viewModelScope.launch {
             fluxAPI.cancelWorkflow(workflow.id)
             loadQueue(showLoading = false)
+            checkStatus()
         }
     }
 
@@ -258,6 +292,13 @@ class MainViewModel(
         viewModelScope.launch {
             fluxAPI.deleteHistory(id)
             loadHistory()
+        }
+    }
+
+    fun randomPrompt() {
+        viewModelScope.launch {
+            val prompt = repository.randomPrompt()
+            updatePrompt(prompt)
         }
     }
 

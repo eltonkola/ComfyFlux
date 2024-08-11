@@ -203,7 +203,7 @@ fun MainAppScreen(
                     }
                 },
                 rightContent = {
-                    PromptSearch {
+                    PromptSearch(viewModel) {
                         viewModel.updatePrompt(it)
                         scope.launch {
                             drawerStateRight.apply {

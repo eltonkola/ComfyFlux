@@ -34,13 +34,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.eltonkola.comfyflux.app.MainViewModel
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Clean
 import com.eltonkola.comfyflux.ui.theme.ikona.Search
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PromptSearch(viewModel: PromptsViewModel = viewModel(), onPromptSelected:(String) -> Unit) {
+fun PromptSearch(viewModel: MainViewModel, onPromptSelected:(String) -> Unit) {
     var searchQuery by remember { mutableStateOf(TextFieldValue("")) }
     val lines = viewModel.pagingDataFlow.collectAsLazyPagingItems()
 

@@ -1,5 +1,6 @@
 package com.eltonkola.comfyflux.app
 
+import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,7 +19,7 @@ enum class AppScreens(val screenName: String){
 @Composable
 fun MainApp(
     viewModel: MainViewModel = viewModel(
-        factory = ImageGenerationViewModelFactory(LocalContext.current.applicationContext)
+        factory = MainViewModelFactory(LocalContext.current.applicationContext as Application)
     )
 ) {
 

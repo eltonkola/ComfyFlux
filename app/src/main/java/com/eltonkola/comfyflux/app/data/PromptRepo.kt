@@ -37,5 +37,23 @@ class PromptRepo(context: Context) {
             }
         }
     }
+
+    suspend fun randomPrompt(): String {
+        val db = dbHelper.readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT Prompt FROM prompts_table ORDER BY RANDOM() LIMIT 1",
+            null // No arguments needed for this query
+        )
+
+        val prompt: String
+        if (cursor.moveToFirst()) {
+            prompt = cursor.getString(cursor.getColumnIndexOrThrow("Prompt"))
+        } else {
+            // Handle no prompts found (optional)
+            prompt = "No prompts found in database."
+        }
+        cursor.close()
+        return prompt
+    }
 }
 

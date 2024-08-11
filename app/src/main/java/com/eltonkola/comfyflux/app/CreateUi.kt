@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
@@ -55,6 +56,7 @@ import com.eltonkola.comfyflux.ui.theme.ikona.Image
 import com.eltonkola.comfyflux.ui.theme.ikona.Magic
 import com.eltonkola.comfyflux.ui.theme.ikona.Paste
 import com.eltonkola.comfyflux.ui.theme.ikona.Promp
+import com.eltonkola.comfyflux.ui.theme.ikona.Random
 import com.eltonkola.comfyflux.ui.theme.ikona.Refresh
 import com.eltonkola.comfyflux.ui.theme.ikona.Seed
 import com.eltonkola.comfyflux.ui.theme.ikona.WorkflowIc
@@ -131,7 +133,7 @@ fun CreateUi(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(1.8f)
+                    .aspectRatio(1.6f)
                     .background(MaterialTheme.colorScheme.secondary),
                 contentAlignment = Alignment.Center
             ) {
@@ -222,7 +224,7 @@ fun PromptTab(uiState: ImageGenerationUiState,
             placeholder = { Text("Enter your prompt") },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(150.dp), // Adjust height as needed
+                .height(180.dp), // Adjust height as needed
             minLines = 6,
             singleLine = false,
             keyboardOptions = KeyboardOptions.Default.copy(
@@ -286,6 +288,17 @@ fun PromptTab(uiState: ImageGenerationUiState,
                     }
                     IconButton(
                         onClick = {
+                            viewModel.randomPrompt()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Ikona.Random,
+                            contentDescription = "Random",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = {
                             viewModel.updatePrompt("")
                         }
                     ) {
@@ -328,7 +341,7 @@ fun MoreTab(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         SeedSelector(uiState = uiState, viewModel = viewModel)
-
+        Spacer(modifier = Modifier.size(200.dp))
     }
 }
 
@@ -400,7 +413,7 @@ fun ImageBatchSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(6.dp)
     ) {
         Text(
@@ -426,7 +439,7 @@ fun SeedSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
 
     Column(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .padding(6.dp)
     ) {
         Text(
