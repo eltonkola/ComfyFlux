@@ -50,15 +50,7 @@ data class ImageGenerationUiState(
 data class ImageViewerUiState(
     val images: List<String> = emptyList(),
     val selected: Int = 0
-) {
-    fun getImage(): String {
-        return if(images.size > selected ){
-            images[selected]
-        } else{
-            ""
-        }
-    }
-}
+)
 
 class ImageGenerationViewModelFactory(private val context: Context) : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

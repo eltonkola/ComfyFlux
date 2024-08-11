@@ -7,12 +7,20 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.widget.Toast
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -22,19 +30,30 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.eltonkola.comfyflux.R
+import com.eltonkola.comfyflux.app.components.ZoomableImage
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Back
 import com.eltonkola.comfyflux.ui.theme.ikona.Download
@@ -46,7 +65,7 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun PhotoViewerScreen(
     viewModel: MainViewModel,
@@ -57,6 +76,8 @@ fun PhotoViewerScreen(
 
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    var currentImageUrl by remember { mutableStateOf("") }
 
     Scaffold(
         topBar = {
@@ -69,7 +90,7 @@ fun PhotoViewerScreen(
                         coroutineScope.launch {
                             saveImageToDownloads(
                                 context,
-                                uiState.getImage(),
+                                currentImageUrl,
                                 "flux_image_${System.currentTimeMillis()}.png",
                                 true
                             )
@@ -85,7 +106,7 @@ fun PhotoViewerScreen(
                         coroutineScope.launch {
                             saveImageToDownloads(
                                 context,
-                                uiState.getImage(),
+                                currentImageUrl,
                                 "flux_image_${System.currentTimeMillis()}.png",
                                 false
                             )
@@ -109,20 +130,31 @@ fun PhotoViewerScreen(
                 }
             )
         },
-    ) {
+    ) { paddingValues ->
 
-        Box(
-            modifier = Modifier.padding(it),
-            contentAlignment = Alignment.BottomEnd
-        ) {
+        val pagerState = rememberPagerState(initialPage = uiState.selected, pageCount = { uiState.images.size } )
 
-            AsyncImage(
-                modifier = Modifier.fillMaxSize(),
-                model = uiState.getImage(),
-                contentDescription = null,
-                contentScale = ContentScale.Fit
-            )
+        HorizontalPager(
+            state = pagerState,
+            contentPadding = paddingValues,
+            modifier = Modifier.fillMaxSize()
+        ) { image ->
 
+            LaunchedEffect(key1 = image) {
+                currentImageUrl = uiState.images[image]
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                AsyncImage(
+                    model = uiState.images[image],
+                    contentDescription = "Image ${image + 1}",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
 
         }
     }

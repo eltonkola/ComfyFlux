@@ -130,7 +130,7 @@ fun CreateUi(
             LinearProgressIndicator(
                 progress = { progressUiState.partialProgress() },
                 modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.primary
             )
 
             Box(
