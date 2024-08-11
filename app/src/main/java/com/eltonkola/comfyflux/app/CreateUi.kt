@@ -127,11 +127,6 @@ fun CreateUi(
                 modifier = Modifier.fillMaxWidth(),
                 color = MaterialTheme.colorScheme.primary
             )
-            LinearProgressIndicator(
-                progress = { progressUiState.partialProgress() },
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.primary
-            )
 
             Box(
                 modifier = Modifier
@@ -161,10 +156,20 @@ fun CreateUi(
                         verticalArrangement = Arrangement.Center
                     ) {
 
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(64.dp),
-                            color = MaterialTheme.colorScheme.onSecondary
-                        )
+                        if(progressUiState.maxProgress > 0) {
+                            CircularProgressIndicator(
+                                progress = {
+                                    progressUiState.partialProgress()
+                                },
+                                modifier = Modifier.size(64.dp),
+                                color = MaterialTheme.colorScheme.onSecondary,
+                                )
+                        }else{
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(64.dp),
+                                color = MaterialTheme.colorScheme.onSecondary
+                            )
+                        }
                     }
                 }
             }

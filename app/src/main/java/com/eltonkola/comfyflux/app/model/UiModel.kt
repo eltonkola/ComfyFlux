@@ -34,7 +34,7 @@ data class Queue(
 data class ProgressGenerationUIState(
     val promptId: String="",
     val progress: Int = 0,
-    val maxProgress: Int = 1,
+    val maxProgress: Int = 0,
     val queueRemaining: Int = 0,
     val generatedImages: List<String> = emptyList(),
     val statusMessage: String = "",
