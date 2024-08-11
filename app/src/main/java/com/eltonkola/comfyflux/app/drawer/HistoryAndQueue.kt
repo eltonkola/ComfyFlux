@@ -14,11 +14,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import com.eltonkola.comfyflux.app.MainViewModel
 
 @Composable
 fun HistoryAndQueue(
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    navController: NavController
 ) {
 
 
@@ -41,7 +43,7 @@ fun HistoryAndQueue(
                 }
             }
             when (tabIndex) {
-                0 -> HistoryTab(viewModel)
+                0 -> HistoryTab(viewModel, navController)
                 1 -> QueueTab(viewModel)
             }
         }

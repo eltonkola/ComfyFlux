@@ -38,7 +38,9 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.eltonkola.comfyflux.app.AppScreens
 import com.eltonkola.comfyflux.app.MainViewModel
 import com.eltonkola.comfyflux.app.components.LoadingUi
 import com.eltonkola.comfyflux.app.model.HistoryItem
@@ -52,7 +54,7 @@ import com.eltonkola.comfyflux.ui.theme.ikona.Refresh
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryTab( viewModel: MainViewModel) {
+fun HistoryTab( viewModel: MainViewModel, navController: NavController) {
 
     val uiState by viewModel.historyUiState.collectAsState()
 
@@ -103,8 +105,10 @@ fun HistoryTab( viewModel: MainViewModel) {
                     ) {
 
                         items(uiState.history) { row ->
-                            HistoryRowUi(row, onClick = {
-                                viewModel.viewImage(row.images, row.images.indexOf(it))
+                            HistoryRowUi(row, openImage = { images, index ->
+                                viewModel.viewImage(images, index)
+                                navController.navigate(AppScreens.ImageViewer.screenName)
+
                             },
                                 onDelete = {
                                 viewModel.deleteHistory(row.id)
@@ -122,7 +126,7 @@ fun HistoryTab( viewModel: MainViewModel) {
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun HistoryRowUi(item: HistoryItem, onClick:(String) -> Unit, onDelete : () -> Unit) {
+fun HistoryRowUi(item: HistoryItem, openImage:(List<String>, Int) -> Unit, onDelete : () -> Unit) {
     val clipboardManager = LocalClipboardManager.current
         Column {
             Text(text = "Nr: ${item.images.size} success: ${item.success} - completed: ${item.completed}")
@@ -136,7 +140,7 @@ fun HistoryRowUi(item: HistoryItem, onClick:(String) -> Unit, onDelete : () -> U
                                 .size(120.dp)
                                 .clip(RoundedCornerShape(10.dp))
                                 .clickable {
-                                    onClick(image)
+                                    openImage(item.images, item.images.indexOf(image))
                                 }
                                 .background(MaterialTheme.colorScheme.secondary),
                             model = image,

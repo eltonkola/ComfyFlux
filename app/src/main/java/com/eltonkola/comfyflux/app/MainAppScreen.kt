@@ -234,7 +234,7 @@ fun MainAppScreen(
                 },
                 sheetState = sheetState
             ) {
-                HistoryAndQueue(viewModel)
+                HistoryAndQueue(viewModel, navController)
             }
         }
     }

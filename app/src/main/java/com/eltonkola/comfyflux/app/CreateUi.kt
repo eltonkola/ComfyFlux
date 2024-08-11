@@ -123,8 +123,14 @@ fun CreateUi(
             }
             Spacer(modifier = Modifier.height(16.dp))
             LinearProgressIndicator(
-                progress = { progressUiState.progress / progressUiState.maxProgress.toFloat() },
+                progress = { progressUiState.totalProgress() },
                 modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.primary
+            )
+            LinearProgressIndicator(
+                progress = { progressUiState.partialProgress() },
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.onPrimaryContainer
             )
 
             Box(
@@ -159,19 +165,7 @@ fun CreateUi(
                             modifier = Modifier.size(64.dp),
                             color = MaterialTheme.colorScheme.onSecondary
                         )
-                        Spacer(modifier = Modifier.height(26.dp))
-                        if(progressUiState.statusMessage.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(text = progressUiState.statusMessage, color = MaterialTheme.colorScheme.onSecondary)
-                        }
-                        if(progressUiState.statusMessage.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(6.dp))
-                            Text(text = progressUiState.error, color = MaterialTheme.colorScheme.onSecondary)
-                        }
-
                     }
-
-
                 }
             }
 

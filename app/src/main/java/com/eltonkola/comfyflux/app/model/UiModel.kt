@@ -39,6 +39,15 @@ data class ProgressGenerationUIState(
     val generatedImages: List<String> = emptyList(),
     val statusMessage: String = "",
     val error: String = "",
-    val executing: Boolean = false
-)
+    val executing: Boolean = false,
+    val allNodes: List<String> = emptyList(),
+    val remainingNodes: List<String> = emptyList()
+){
+    fun totalProgress() : Float {
+        return (allNodes.size - remainingNodes.size) / allNodes.size.toFloat()
+    }
+    fun partialProgress() : Float {
+        return progress / maxProgress.toFloat()
+    }
+}
 
