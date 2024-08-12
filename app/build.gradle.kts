@@ -13,7 +13,7 @@ fun Project.loadProperties(): Properties? {
         file("../local.properties").inputStream().use { properties.load(it) }
         properties
     } catch (e: Exception){
-        throw Exception("must be in ci, or you did not setup the local properties")
+        //throw Exception("must be in ci, or you did not setup the local properties")
         null
     }
 }
