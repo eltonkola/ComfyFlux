@@ -7,15 +7,20 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
-fun Project.loadProperties(): Properties {
-    val properties = Properties()
-    file("../local.properties").inputStream().use { properties.load(it) }
-    return properties
+fun Project.loadProperties(): Properties? {
+    return try {
+        val properties = Properties()
+        file("../local.properties").inputStream().use { properties.load(it) }
+        properties
+    } catch (e: Exception){
+        throw Exception("must be in ci, or you did not setup the local properties")
+        null
+    }
 }
 
 fun Project.apiKey(): String {
     val properties = loadProperties()
-    return properties.getProperty("GROQ_API_KEY") ?: System.getenv("GROQ_API_KEY") ?: ""
+    return properties?.getProperty("GROQ_API_KEY") ?: System.getenv("GROQ_API_KEY") ?: ""
 }
 
 
