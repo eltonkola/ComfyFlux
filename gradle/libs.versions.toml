@@ -14,6 +14,7 @@ ktor = "2.3.12"
 kotlinx-coroutines = "1.8.1"
 kotlinx-serialization = "1.7.1"
 lifecycle = "2.8.4"
+multiplatformSettings = "1.1.1"
 navigationCompose = "2.7.7"
 pagingRuntime = "3.3.1"
 junitJupiter = "5.8.1"
@@ -53,6 +54,7 @@ kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutine
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 junit-jupiter = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "junitJupiter" }
 core-ktx = { group = "androidx.test", name = "core-ktx", version.ref = "coreKtxVersion" }
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatformSettings" }
 
 
 [plugins]

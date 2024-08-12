@@ -1,8 +1,8 @@
 package com.eltonkola.comfyflux.app.netwrok
 
 import android.util.Log
-import androidx.core.os.BuildCompat
 import com.eltonkola.comfyflux.BuildConfig
+import com.eltonkola.comfyflux.app.data.AppSettings
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -77,10 +77,10 @@ data class ApiResponse(
     val xGroq: XGroq? = null
 )
 
-class GroqAPI {
+class GroqAPI(private val appSettings: AppSettings) {
 
     companion object{
-        private const val API_KEY = BuildConfig.GROQ_API_KEY
+        private const val SHARED_API_KEY = BuildConfig.GROQ_API_KEY
     }
 
     private val client = HttpClient(CIO) {
@@ -96,8 +96,10 @@ class GroqAPI {
 
     @OptIn(InternalAPI::class)
     suspend fun enrichPrompt(initialPrompt: String): String {
-        Log.d("GrowAPI", "enrichPrompt - $API_KEY -  initialPrompt: $initialPrompt")
 
+        val apiKey = appSettings.settingsState.value.grqApiKey.ifEmpty { SHARED_API_KEY }
+
+        Log.d("GrowAPI", "enrichPrompt - $apiKey -  initialPrompt: $initialPrompt")
         val url = "https://api.groq.com/openai/v1/chat/completions"
 
         val requestBody = RequestBody(
@@ -114,7 +116,7 @@ class GroqAPI {
         val jsonBody = json.encodeToString(requestBody)
 
         val response: HttpResponse = client.post(url) {
-            header(HttpHeaders.Authorization, "Bearer $API_KEY")
+            header(HttpHeaders.Authorization, "Bearer $apiKey")
             contentType(ContentType.Application.Json)
             body =  jsonBody
         }

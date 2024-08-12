@@ -12,7 +12,9 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.eltonkola.comfyflux.app.data.AppSettings
 import com.eltonkola.comfyflux.app.data.PromptRepo
+import com.eltonkola.comfyflux.app.data.SettingsState
 import com.eltonkola.comfyflux.app.model.HistoryUiState
 import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.app.model.PromptRequest
@@ -38,7 +40,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
-import okhttp3.internal.applyConnectionSpec
 import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.random.Random
@@ -73,11 +74,12 @@ class MainViewModelFactory(private val application: Application) : ViewModelProv
     }
 }
 
+
 class MainViewModel(
     private val applicationContext: Application,
     private val fluxAPI: FluxAPI = FluxAPI(),
-    private val groqAPI: GroqAPI = GroqAPI(),
     ) : AndroidViewModel(applicationContext) {
+
 
     private val repository = PromptRepo(applicationContext)
     //prompt search
@@ -351,6 +353,33 @@ class MainViewModel(
         val seconds = (time / 1000) % 60
         return String.format("%02d:%02d", minutes, seconds)
     }
+
+
+
+    //settings
+
+    private val appSettings = AppSettings(applicationContext.getSharedPreferences("AppSettingsPrefs", Context.MODE_PRIVATE))
+    private val groqAPI: GroqAPI = GroqAPI(appSettings)
+
+    fun updateSystemTheme(system: Boolean) {
+        appSettings.setSystemTheme(system)
+    }
+
+    fun updateDarkTheme(dark: Boolean) {
+        appSettings.setDarkTheme(dark)
+    }
+
+    fun updateDynamicColor(dynamic: Boolean) {
+        appSettings.setDynamicColor(dynamic)
+    }
+
+    fun setGrqApiKey(key: String) {
+        appSettings.setGroqApiKey(key)
+    }
+
+    // Observe theme state
+    val settingsState: StateFlow<SettingsState> = appSettings.settingsState
+
 
 
 }

@@ -98,4 +98,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.coil.compose)
 
+    //we cloud make this a multiplatform project, this library would just work
+    implementation(libs.multiplatform.settings)
+
 }
