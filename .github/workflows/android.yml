@@ -16,29 +16,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          distribution: 'adopt'
-          java-version: '17'
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v2.0.10
 
-      - name: Install Android Command Line Tools
-        run: |
-            mkdir -p $ANDROID_HOME/cmdline-tools
-            curl -sL https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -o commandlinetools.zip
-            unzip commandlinetools.zip -d $ANDROID_HOME/cmdline-tools
-            rm commandlinetools.zip
-            mv $ANDROID_HOME/cmdline-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest
-            yes | sdkmanager --licenses
-          env:
-            ANDROID_HOME: /usr/local/lib/android/sdk
-    
-          - name: Install Android SDK Build Tools
-            run: |
-              sdkmanager "build-tools;29.0.3"
-            env:
-              ANDROID_HOME: /usr/local/lib/android/sdk
-              PATH: $ANDROID_HOME/cmdline-tools/latest/bin:$PATH
+
       # 2
       - name: Generate Release APK
         run: ./gradlew assembleRelease
