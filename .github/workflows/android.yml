@@ -22,6 +22,9 @@ jobs:
           distribution: 'adopt'
           java-version: '17'
 
+      - name: Install Android SDK Build Tools
+        run: sdkmanager "build-tools;29.0.3"
+
       # 2
       - name: Generate Release APK
         run: ./gradlew assembleRelease
