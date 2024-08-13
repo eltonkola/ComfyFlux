@@ -3,4 +3,5 @@
     <string name="about_body">ComfyFlux brings the power of ComfyUI to your mobile device! Designed for those of us with multiple computers but limited portability, this app lets you generate images directly from your phone. It’s small, quick, and easy to use, with local-first functionality and optional remote calls to enhance your prompts. Created for ComfyUI and Flux enthusiasts, ComfyFlux is perfect for fun and creative exploration. Feel free to fork and adapt it to fit your needs!</string>
     <string name="about_link">https://github.com/eltonkola/ComfyFlux</string>
     <string name="about_version">Version %1s</string>
+    <string name="server_disconnected">Please make sure your server in online, and in the same network, to be able to use this app.\nRemember, this us just a minimal front ent for simple flows.</string>
 </resources>

@@ -44,11 +44,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.eltonkola.comfyflux.R
 import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.ArrowDown
@@ -80,7 +82,10 @@ fun CreateUi(
         Spacer(modifier = Modifier.height(16.dp))
 
         if (uiState.stats == null) {
-            Text(text = "Please make sure your server in online, and in the same network, to be able to use this app.\nRemember, this us just a minimal front ent for simple flows.")
+            Text(
+                text = stringResource(R.string.server_disconnected),
+                modifier = Modifier.padding(16.dp)
+                )
 
         } else {
 
@@ -160,7 +165,10 @@ fun CreateUi(
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onPrimary,
                         style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 22.dp).fillMaxWidth()
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 22.dp)
+                            .fillMaxWidth()
                     )
 
                     Column(

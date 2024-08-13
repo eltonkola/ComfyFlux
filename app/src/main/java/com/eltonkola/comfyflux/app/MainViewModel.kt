@@ -45,7 +45,7 @@ import java.nio.charset.Charset
 import kotlin.random.Random
 
 data class ImageGenerationUiState(
-    val prompt: String = "a cat with a hat",
+    val prompt: String = "",
     val server: String = DEFAULT_URL,
 
     val loadingStats: Boolean = false,
@@ -181,6 +181,9 @@ class MainViewModel(
 
     fun generateImages() {
         viewModelScope.launch {
+            if(uiState.value.prompt.isBlank()){
+                return@launch
+            }
             resetTimer()
             startTimer()
             try {
@@ -353,8 +356,6 @@ class MainViewModel(
         val seconds = (time / 1000) % 60
         return String.format("%02d:%02d", minutes, seconds)
     }
-
-
 
     //settings
 

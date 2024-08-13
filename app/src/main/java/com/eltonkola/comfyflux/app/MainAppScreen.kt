@@ -118,6 +118,8 @@ fun MainAppScreen(
 
         },
         floatingActionButton = {
+
+            if(drawerStateLeft.isClosed && drawerStateRight.isClosed){
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -145,7 +147,7 @@ fun MainAppScreen(
                 }
                 Spacer(modifier = Modifier.size(8.dp))
 
-                if(progressUiState.executing){
+                if (progressUiState.executing) {
                     ExtendedFloatingActionButton(
                         containerColor = MaterialTheme.colorScheme.primary,
                         onClick = {
@@ -159,15 +161,15 @@ fun MainAppScreen(
                         )
                         Text(text = "Stop")
                     }
-                }else{
+                } else {
                     ExtendedFloatingActionButton(
                         containerColor = MaterialTheme.colorScheme.primary,
                         onClick = {
-                                viewModel.generateImages()
-                                keyboardController?.hide()
+                            viewModel.generateImages()
+                            keyboardController?.hide()
                         },
 
-                        ) {
+                    ) {
                         Icon(
                             imageVector = Ikona.Create,
                             contentDescription = "Create",
@@ -176,8 +178,9 @@ fun MainAppScreen(
                         Text(text = "Create")
                     }
                 }
-
             }
+
+         }
 
         }
     ) { contentPadding ->
