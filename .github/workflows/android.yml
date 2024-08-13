@@ -23,8 +23,10 @@ jobs:
           java-version: '17'
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v2.0.10
+        uses: android-actions/setup-android@v3
 
+      - name: Install tools
+        run: sdkmanager tools platform-tools
 
       # 2
       - name: Generate Release APK
