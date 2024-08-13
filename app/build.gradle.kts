@@ -109,4 +109,10 @@ dependencies {
     //we cloud make this a multiplatform project, this library would just work
     implementation(libs.multiplatform.settings)
 
+    implementation(platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+
 }

@@ -3,6 +3,7 @@ package com.eltonkola.comfyflux.app
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
@@ -40,6 +41,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import java.io.File
 import java.io.InputStream
 import java.nio.charset.Charset
 import kotlin.random.Random
@@ -233,8 +235,7 @@ class MainViewModel(
         }
 
         val workflowConfig = _uiState.value.workflow
-        val workflowRaw = applicationContext.resources.openRawResource(workflowConfig.workflowRes)
-        val workflowInput = workflowRaw.readTextAndClose()
+        val workflowInput = applicationContext.getWorkflowAsText(workflowConfig) ?: throw Exception("Error reading workflow!")
         val workflow = Json.decodeFromString<Workflow>(workflowInput)
 
 
@@ -383,6 +384,26 @@ class MainViewModel(
 
 
 
+}
+
+fun Context.getWorkflowAsText(workflow: WorkflowFile) : String? {
+    return try {
+        if (workflow.isAsset) {
+            // Load from assets
+            val fileName = workflow.workflowUri.removePrefix("file:///android_asset/")
+            assets.open(fileName).bufferedReader().use { it.readText() }
+        } else {
+            Log.d("ComfyFlux", "reading file: ${workflow.workflowUri}")
+            val uri = Uri.parse(workflow.workflowUri)
+            contentResolver.openInputStream(uri)?.bufferedReader().use {
+                it?.readText()
+            }
+
+        }
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
 }
 
 fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String {
