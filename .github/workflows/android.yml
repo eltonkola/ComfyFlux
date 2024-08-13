@@ -50,12 +50,12 @@ jobs:
           name: release.apk
           path: ${{steps.sign_app.outputs.signedReleaseFile}}
 
-      - name: Upload to slack step
-        uses: MeilCli/slack-upload-file@v1
+
+      - uses: MeilCli/slack-upload-file@v4
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
-          channels: 'random'
+          channel_id: 'android'
           file_path: ${{steps.sign_app.outputs.signedReleaseFile}}
-          file_name: 'lajmeShqip.apk'
+          initial_comment: 'posted by github actions'
+          file_name: 'comfyFlex.apk'
           file_type: 'apk'
-          initial_comment: 'post by slack-upload-file'
