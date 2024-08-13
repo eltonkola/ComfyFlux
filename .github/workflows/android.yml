@@ -54,7 +54,7 @@ jobs:
       - uses: MeilCli/slack-upload-file@v4
         with:
           slack_token: ${{ secrets.SLACK_TOKEN }}
-          channel_id: 'android'
+          channel_id: 'C07GHA7D43F'
           file_path: ${{steps.sign_app.outputs.signedReleaseFile}}
           initial_comment: 'posted by github actions'
           file_name: 'comfyFlex.apk'
