@@ -50,7 +50,7 @@ fun PromptSearch(viewModel: MainViewModel, onPromptSelected:(String) -> Unit) {
 
         Text(
             text = "Prompt search",
-            style = MaterialTheme.typography.displaySmall
+            style = MaterialTheme.typography.headlineMedium
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(

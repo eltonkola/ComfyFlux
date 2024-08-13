@@ -18,7 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -50,7 +49,7 @@ fun WorkflowsUi(onSelect: (WorkflowFile) -> Unit, uiState: ImageGenerationUiStat
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = "Select a workflow to generate images with.",
-            style = MaterialTheme.typography.bodyMedium
+            style = MaterialTheme.typography.bodyLarge
         )
         Spacer(modifier = Modifier.size(8.dp))
 
@@ -66,10 +65,9 @@ fun WorkflowsUi(onSelect: (WorkflowFile) -> Unit, uiState: ImageGenerationUiStat
                     Spacer(modifier = Modifier.size(4.dp))
                 }
             }
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(4.dp))
 
         }
-
 
         ExpandableSection(
             expanded = localOpen,
