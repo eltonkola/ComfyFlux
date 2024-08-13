@@ -170,7 +170,7 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = "logo")
+                        painter = painterResource(id = R.drawable.logo), contentDescription = "logo")
                     Text(
                         text = stringResource(id = R.string.app_name),
                         style = MaterialTheme.typography.labelLarge
