@@ -119,7 +119,7 @@ fun MainAppScreen(
         },
         floatingActionButton = {
 
-            if(drawerStateLeft.isClosed && drawerStateRight.isClosed){
+            if(drawerStateLeft.isClosed && drawerStateRight.isClosed && uiState.stats != null ){
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End

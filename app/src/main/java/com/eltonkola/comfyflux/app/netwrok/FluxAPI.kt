@@ -1,5 +1,6 @@
 package com.eltonkola.comfyflux.app.netwrok
 
+import android.net.Uri
 import android.util.Log
 import com.eltonkola.comfyflux.app.model.HistoryItem
 import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
@@ -8,7 +9,6 @@ import com.eltonkola.comfyflux.app.model.Queue
 import com.eltonkola.comfyflux.app.model.SystemStats
 import com.eltonkola.comfyflux.app.model.WSMessage
 import com.eltonkola.comfyflux.app.model.Workflow
-import com.eltonkola.comfyflux.app.model.workflows
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -26,22 +26,17 @@ import io.ktor.util.InternalAPI
 import io.ktor.websocket.Frame
 import io.ktor.websocket.readText
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.add
 import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonArray
-import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.putJsonArray
 import java.util.UUID
 
@@ -79,7 +74,14 @@ data class Status(
 @Serializable
 data class QueuePromptResponse(val prompt_id: String, val number: Int, val node_errors: Map<String, String>)
 
-const val DEFAULT_URL = "192.168.0.2:8188"
+const val DEFAULT_URL = "http://192.168.0.2:8188"
+
+fun extractAddressAndPort(url: String): Pair<String, Int> {
+    val uri = Uri.parse(url)
+    val address = uri.host ?: ""
+    val port = if (uri.port != -1) uri.port else 80 // Use 80 if no port is specified
+    return Pair(address, port)
+}
 
 /*
 Api docs:
@@ -113,7 +115,7 @@ class FluxAPI {
         val prompt = Json.encodeToString(promptRequest)
 
         Log.d("FluxAPI", "Sending prompt: $prompt")
-        val response = client.post("http://$serverAddress/prompt") {
+        val response = client.post("$serverAddress/prompt") {
             contentType(ContentType.Application.Json)
             setBody(prompt)
         }
@@ -206,10 +208,11 @@ class FluxAPI {
             remainingNodes = prompt.prompt.keys.toList(),
             )
         // Start WebSocket connection
+        val (address, port) = extractAddressAndPort(serverAddress)
         client.webSocket(
             method = HttpMethod.Get,
-            host = serverAddress.split(":")[0],
-            port = serverAddress.split(":")[1].toInt(),
+            host = address,
+            port = port,
             path = "/ws?clientId=$clientId"
         ) {
             while (true) {
@@ -249,7 +252,7 @@ class FluxAPI {
     suspend fun checkSystemStats(): SystemStats? {
         Log.d("FluxAPI", "call checkSystemStats")
         return try {
-            val response = client.get("http://$serverAddress/system_stats") {
+            val response = client.get("$serverAddress/system_stats") {
                 contentType(ContentType.Application.Json)
             }
             val responseBody = response.bodyAsText()
@@ -265,7 +268,7 @@ class FluxAPI {
 
     suspend fun fetchHistory(): List<HistoryItem> {
         return withContext(Dispatchers.IO) {
-            val response = client.get("http://$serverAddress/history")
+            val response = client.get("$serverAddress/history")
             val responseBody = response.bodyAsText()
 
             Log.d("FluxAPI", "Received fetchHistory responseBody: $responseBody")
@@ -278,7 +281,7 @@ class FluxAPI {
 
     suspend fun fetchQueue(): Queue {
         return withContext(Dispatchers.IO) {
-            val response = client.get("http://$serverAddress/queue")
+            val response = client.get("$serverAddress/queue")
             val responseBody = response.bodyAsText()
 
             Log.d("FluxAPI", "Received fetchQueue responseBody: $responseBody")
@@ -323,7 +326,7 @@ class FluxAPI {
         }.toString()
 
         return withContext(Dispatchers.IO) {
-            val response = client.post("http://$serverAddress/history") {
+            val response = client.post("$serverAddress/history") {
                 contentType(ContentType.Application.Json)
                 body = deleteBody
             }
@@ -345,7 +348,7 @@ class FluxAPI {
         }.toString()
 
         return withContext(Dispatchers.IO) {
-            val response = client.post("http://$serverAddress/queue") {
+            val response = client.post("$serverAddress/queue") {
                 contentType(ContentType.Application.Json)
                 body = deleteBody
             }
@@ -373,14 +376,14 @@ class FluxAPI {
 
     suspend fun interrupt() {
         withContext(Dispatchers.IO) {
-            val response = client.post("http://$serverAddress/interrupt")
+            val response = client.post("$serverAddress/interrupt")
             val responseBody = response.bodyAsText()
             Log.d("FluxAPI", "Received interrupt: $responseBody")
         }
     }
 
     private fun getImage(filename: String, subfolder: String, type: String) : String {
-        return "http://$serverAddress/view?filename=$filename&subfolder=$subfolder&type=$type"
+        return "$serverAddress/view?filename=$filename&subfolder=$subfolder&type=$type"
     }
 
 }
