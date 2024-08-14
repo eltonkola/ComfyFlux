@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app.netwrok
+package com.eltonkola.comfyflux.data.netwrok
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement

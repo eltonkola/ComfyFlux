@@ -34,9 +34,11 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.eltonkola.comfyflux.app.drawer.HistoryAndQueue
-import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
-import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
+import com.eltonkola.comfyflux.data.model.ImageGenerationUiState
+import com.eltonkola.comfyflux.data.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.app.prompts.PromptSearch
+import com.eltonkola.comfyflux.app.workflows.WorkflowsUi
+import com.eltonkola.comfyflux.components.DoubleDrawerUi
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Create
 import com.eltonkola.comfyflux.ui.theme.ikona.History

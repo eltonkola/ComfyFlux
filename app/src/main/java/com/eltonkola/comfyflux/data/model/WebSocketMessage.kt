@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app.model
+package com.eltonkola.comfyflux.data.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

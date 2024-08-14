@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app.model
+package com.eltonkola.comfyflux.data.model
 
 data class WorkflowFile(
     val name: String,

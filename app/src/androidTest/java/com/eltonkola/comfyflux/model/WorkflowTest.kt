@@ -4,10 +4,10 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.eltonkola.comfyflux.R
-import com.eltonkola.comfyflux.app.model.Meta
-import com.eltonkola.comfyflux.app.model.Node
-import com.eltonkola.comfyflux.app.model.SizeInputs
-import com.eltonkola.comfyflux.app.model.Workflow
+import com.eltonkola.comfyflux.data.model.Meta
+import com.eltonkola.comfyflux.data.model.Node
+import com.eltonkola.comfyflux.data.model.SizeInputs
+import com.eltonkola.comfyflux.data.model.Workflow
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull

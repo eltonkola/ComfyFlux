@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app
+package com.eltonkola.comfyflux.app.imageviwer
 
 import android.content.ContentValues
 import android.content.Context
@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.eltonkola.comfyflux.R
+import com.eltonkola.comfyflux.app.MainViewModel
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Back
 import com.eltonkola.comfyflux.ui.theme.ikona.Download

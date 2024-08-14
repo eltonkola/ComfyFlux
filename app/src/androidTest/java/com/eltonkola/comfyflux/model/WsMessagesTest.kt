@@ -1,6 +1,6 @@
 package com.eltonkola.comfyflux.model
 
-import com.eltonkola.comfyflux.app.model.WSMessage
+import com.eltonkola.comfyflux.data.model.WSMessage
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Test

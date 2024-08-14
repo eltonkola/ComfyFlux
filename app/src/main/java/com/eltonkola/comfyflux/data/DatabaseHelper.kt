@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app.data
+package com.eltonkola.comfyflux.data
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase

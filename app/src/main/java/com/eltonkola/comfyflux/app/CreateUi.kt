@@ -50,8 +50,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.eltonkola.comfyflux.R
-import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
-import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
+import com.eltonkola.comfyflux.data.model.ImageGenerationUiState
+import com.eltonkola.comfyflux.data.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.ArrowDown
 import com.eltonkola.comfyflux.ui.theme.ikona.Clean

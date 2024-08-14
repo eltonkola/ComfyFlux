@@ -1,6 +1,6 @@
 package com.eltonkola.comfyflux.app.usecase
 
-import com.eltonkola.comfyflux.app.model.ImageViewerUiState
+import com.eltonkola.comfyflux.data.model.ImageViewerUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

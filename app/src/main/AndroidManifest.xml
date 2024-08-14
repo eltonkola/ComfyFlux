@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:requestLegacyExternalStorage="true"
         android:usesCleartextTraffic="true"
-        android:name=".app.ConfyFluxApp"
+        android:name=".MainApp"
         android:theme="@style/Theme.ComfyFlux"
         tools:targetApi="31">
         <activity

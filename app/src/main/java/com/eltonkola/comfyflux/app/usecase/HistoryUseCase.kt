@@ -1,8 +1,8 @@
 package com.eltonkola.comfyflux.app.usecase
 
 import android.util.Log
-import com.eltonkola.comfyflux.app.model.HistoryUiState
-import com.eltonkola.comfyflux.app.netwrok.FluxAPI
+import com.eltonkola.comfyflux.data.model.HistoryUiState
+import com.eltonkola.comfyflux.data.netwrok.FluxAPI
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

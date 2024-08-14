@@ -30,8 +30,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.eltonkola.comfyflux.app.MainViewModel
-import com.eltonkola.comfyflux.app.components.LoadingUi
-import com.eltonkola.comfyflux.app.model.Queue
+import com.eltonkola.comfyflux.components.LoadingUi
+import com.eltonkola.comfyflux.data.model.Queue
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Cancel
 import com.eltonkola.comfyflux.ui.theme.ikona.Error

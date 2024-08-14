@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app
+package com.eltonkola.comfyflux.app.imageviwer
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.SecureFlagPolicy
-import com.eltonkola.comfyflux.app.components.ZoomableImage
+import com.eltonkola.comfyflux.components.ZoomableImage
 
 @Composable
 fun PhotoZoomDialog(

@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app.components
+package com.eltonkola.comfyflux.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border

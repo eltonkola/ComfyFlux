@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app
+package com.eltonkola.comfyflux.app.workflows
 
 import android.app.Application
 import android.content.Intent
@@ -36,8 +36,8 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
-import com.eltonkola.comfyflux.app.model.WorkflowFile
+import com.eltonkola.comfyflux.data.model.ImageGenerationUiState
+import com.eltonkola.comfyflux.data.model.WorkflowFile
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Error
 import com.eltonkola.comfyflux.ui.theme.ikona.Folder

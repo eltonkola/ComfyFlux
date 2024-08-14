@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app
+package com.eltonkola.comfyflux.app.settings
 
 import android.content.Context
 import android.content.Intent
@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.eltonkola.comfyflux.R
+import com.eltonkola.comfyflux.app.MainViewModel
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Back
 import com.eltonkola.comfyflux.ui.theme.ikona.Key

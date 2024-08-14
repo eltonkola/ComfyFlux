@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app
+package com.eltonkola.comfyflux.app.workflows
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -25,10 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import com.eltonkola.comfyflux.app.components.ExpandableSection
-import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
-import com.eltonkola.comfyflux.app.model.WorkflowFile
-import com.eltonkola.comfyflux.app.model.workflows
+import com.eltonkola.comfyflux.components.ExpandableSection
+import com.eltonkola.comfyflux.data.model.ImageGenerationUiState
+import com.eltonkola.comfyflux.data.model.WorkflowFile
+import com.eltonkola.comfyflux.data.model.workflows
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.ArrowRight
 import com.eltonkola.comfyflux.ui.theme.ikona.WorkflowIc

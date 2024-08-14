@@ -1,4 +1,4 @@
-package com.eltonkola.comfyflux.app.components
+package com.eltonkola.comfyflux.components
 
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box

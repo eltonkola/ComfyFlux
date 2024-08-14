@@ -1,14 +1,14 @@
-package com.eltonkola.comfyflux.app.netwrok
+package com.eltonkola.comfyflux.data.netwrok
 
 import android.net.Uri
 import android.util.Log
-import com.eltonkola.comfyflux.app.model.HistoryItem
-import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
-import com.eltonkola.comfyflux.app.model.PromptRequest
-import com.eltonkola.comfyflux.app.model.Queue
-import com.eltonkola.comfyflux.app.model.SystemStats
-import com.eltonkola.comfyflux.app.model.WSMessage
-import com.eltonkola.comfyflux.app.model.Workflow
+import com.eltonkola.comfyflux.data.model.HistoryItem
+import com.eltonkola.comfyflux.data.model.ProgressGenerationUIState
+import com.eltonkola.comfyflux.data.model.PromptRequest
+import com.eltonkola.comfyflux.data.model.Queue
+import com.eltonkola.comfyflux.data.model.SystemStats
+import com.eltonkola.comfyflux.data.model.WSMessage
+import com.eltonkola.comfyflux.data.model.Workflow
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation

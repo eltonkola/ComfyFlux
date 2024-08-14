@@ -42,8 +42,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.eltonkola.comfyflux.app.AppScreens
 import com.eltonkola.comfyflux.app.MainViewModel
-import com.eltonkola.comfyflux.app.components.LoadingUi
-import com.eltonkola.comfyflux.app.model.HistoryItem
+import com.eltonkola.comfyflux.components.LoadingUi
+import com.eltonkola.comfyflux.data.model.HistoryItem
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Copy
 import com.eltonkola.comfyflux.ui.theme.ikona.Delete

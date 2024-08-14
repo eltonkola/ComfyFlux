@@ -1,8 +1,8 @@
-package com.eltonkola.comfyflux.app.netwrok
+package com.eltonkola.comfyflux.data.netwrok
 
 import android.util.Log
 import com.eltonkola.comfyflux.BuildConfig
-import com.eltonkola.comfyflux.app.data.AppSettings
+import com.eltonkola.comfyflux.data.AppSettings
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
