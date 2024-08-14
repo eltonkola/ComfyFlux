@@ -70,9 +70,12 @@ data class Status(
 )
 
 
-
 @Serializable
-data class QueuePromptResponse(val prompt_id: String, val number: Int, val node_errors: Map<String, String>)
+data class QueuePromptResponse(
+    val prompt_id: String,
+    val number: Int,
+    val node_errors: Map<String, String>
+)
 
 const val DEFAULT_URL = "http://192.168.0.2:8188"
 
@@ -202,11 +205,11 @@ class FluxAPI {
         Log.d("FluxAPI", "Requested prompt: $promptId")
         // Create a MutableStateFlow to keep track of when the queue is empty
         val queueStatusFlow = MutableStateFlow(false)
-        _progressUiState.value =  ProgressGenerationUIState(
+        _progressUiState.value = ProgressGenerationUIState(
             executing = true,
             allNodes = prompt.prompt.keys.toList(),
             remainingNodes = prompt.prompt.keys.toList(),
-            )
+        )
         // Start WebSocket connection
         val (address, port) = extractAddressAndPort(serverAddress)
         client.webSocket(
@@ -227,16 +230,21 @@ class FluxAPI {
                     val uiState = when (wsMessage) {
                         is WSMessage.PromptMessage -> handlePromptMessage(wsMessage)
                         is WSMessage.StatusMessage -> handleStatusMessage(wsMessage)
-                        is WSMessage.ExecutionCachedMessage -> handleExecutionCachedMessage(wsMessage)
+                        is WSMessage.ExecutionCachedMessage -> handleExecutionCachedMessage(
+                            wsMessage
+                        )
+
                         is WSMessage.ExecutingMessage -> handleExecutingMessage(wsMessage)
                         is WSMessage.ProgressMessage -> handleProgressMessage(wsMessage)
                         is WSMessage.ExecutedMessage -> handleExecutedMessage(wsMessage)
-                        is WSMessage.ExecutionSuccessMessage -> handleExecutionSuccessMessage(wsMessage)
+                        is WSMessage.ExecutionSuccessMessage -> handleExecutionSuccessMessage(
+                            wsMessage
+                        )
                     }
 
                     _progressUiState.value = uiState
 
-                    if(uiState.queueRemaining == 0){
+                    if (uiState.queueRemaining == 0) {
                         queueStatusFlow.value = true
                         Log.d("FluxAPI", "Received ws message: $wsMessage")
 
@@ -292,7 +300,7 @@ class FluxAPI {
         }
     }
 
-    private fun QueueResponse.normalize() : Queue {
+    private fun QueueResponse.normalize(): Queue {
         Log.d("FluxAPI", "call QueueResponse normalize: $this")
 
         return Queue(
@@ -301,7 +309,7 @@ class FluxAPI {
         )
     }
 
-    private fun JsonElement.toQueueWorkflow() : Queue.Workflow {
+    private fun JsonElement.toQueueWorkflow(): Queue.Workflow {
 
         val workflow = Json.decodeFromString<Workflow>(this.jsonArray[2].toString())
 
@@ -318,7 +326,7 @@ class FluxAPI {
     }
 
     @OptIn(InternalAPI::class)
-    suspend fun deleteHistory(id: String){
+    suspend fun deleteHistory(id: String) {
         val deleteBody = buildJsonObject {
             putJsonArray("delete") {
                 add(id)
@@ -338,9 +346,8 @@ class FluxAPI {
     }
 
 
-
     @OptIn(InternalAPI::class)
-    suspend fun cancelWorkflow(id: String){
+    suspend fun cancelWorkflow(id: String) {
         val deleteBody = buildJsonObject {
             putJsonArray("delete") {
                 add(id)
@@ -366,7 +373,10 @@ class FluxAPI {
         val prompt = Json.decodeFromString<Workflow>(this.prompt[2].toString())
 
         return HistoryItem(
-            images = this.outputs.values.flatMap { it.images.filter { it.type == "output" }.map { getImage(it.filename,it.subfolder, it.type) } },
+            images = this.outputs.values.flatMap {
+                it.images.filter { it.type == "output" }
+                    .map { getImage(it.filename, it.subfolder, it.type) }
+            },
             success = this.status.status_str == "success",
             completed = this.status.completed,
             prompt = prompt,
@@ -382,12 +392,12 @@ class FluxAPI {
         }
     }
 
-    private fun getImage(filename: String, subfolder: String, type: String) : String {
+    private fun getImage(filename: String, subfolder: String, type: String): String {
         return "$serverAddress/view?filename=$filename&subfolder=$subfolder&type=$type"
     }
 
 }
 
-fun String.cleanHistoryPrompt() : String {
+fun String.cleanHistoryPrompt(): String {
     return this.trim('"').trim('\\').removePrefix("\"")
 }

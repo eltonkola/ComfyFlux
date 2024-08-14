@@ -27,30 +27,29 @@ fun ImageGrid(images: List<String>, onZoom: (String) -> Unit) {
         columns = GridCells.Adaptive(minSize = 160.dp),
         contentPadding = PaddingValues(4.dp)
     ) {
-            items(images.size) { index ->
+        items(images.size) { index ->
 
-                    Box(
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .size(160.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .clickable {
-                                onZoom(images[index])
-                            }
-                        ,
-                    ) {
-                        AsyncImage(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(2.dp))
-                                .background(MaterialTheme.colorScheme.secondary),
-                            model = images[index],
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop
-                        )
+            Box(
+                modifier = Modifier
+                    .padding(4.dp)
+                    .size(160.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .clickable {
+                        onZoom(images[index])
+                    },
+            ) {
+                AsyncImage(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(MaterialTheme.colorScheme.secondary),
+                    model = images[index],
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop
+                )
 
-                }
             }
+        }
 
     }
 }

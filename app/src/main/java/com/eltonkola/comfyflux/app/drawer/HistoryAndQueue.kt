@@ -24,29 +24,31 @@ fun HistoryAndQueue(
 ) {
 
 
-        var tabIndex by remember { mutableIntStateOf(0) }
+    var tabIndex by remember { mutableIntStateOf(0) }
 
-        val tabs = listOf("History", "Queue")
+    val tabs = listOf("History", "Queue")
 
 
-        Column(modifier = Modifier
+    Column(
+        modifier = Modifier
             .fillMaxWidth()
             .defaultMinSize(minHeight = 360.dp)
-            .padding(8.dp)) {
+            .padding(8.dp)
+    ) {
 
-            TabRow(selectedTabIndex = tabIndex) {
-                tabs.forEachIndexed { index, title ->
-                    Tab(text = { Text(title) },
-                        selected = tabIndex == index,
-                        onClick = { tabIndex = index }
-                    )
-                }
-            }
-            when (tabIndex) {
-                0 -> HistoryTab(viewModel, navController)
-                1 -> QueueTab(viewModel)
+        TabRow(selectedTabIndex = tabIndex) {
+            tabs.forEachIndexed { index, title ->
+                Tab(text = { Text(title) },
+                    selected = tabIndex == index,
+                    onClick = { tabIndex = index }
+                )
             }
         }
+        when (tabIndex) {
+            0 -> HistoryTab(viewModel, navController)
+            1 -> QueueTab(viewModel)
+        }
+    }
 
 
 }

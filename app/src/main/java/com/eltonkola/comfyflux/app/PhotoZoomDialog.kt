@@ -24,8 +24,8 @@ fun PhotoZoomDialog(
             dismissOnBackPress = true,
             dismissOnClickOutside = true,
             securePolicy = SecureFlagPolicy.Inherit,
-            usePlatformDefaultWidth  = false,
-            decorFitsSystemWindows  = false
+            usePlatformDefaultWidth = false,
+            decorFitsSystemWindows = false
         ),
         onDismissRequest = onDismissRequest
     ) {

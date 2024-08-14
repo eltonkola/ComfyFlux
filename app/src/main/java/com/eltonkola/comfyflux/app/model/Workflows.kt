@@ -1,14 +1,11 @@
 package com.eltonkola.comfyflux.app.model
 
-import com.eltonkola.comfyflux.R
-
 data class WorkflowFile(
     val name: String,
-    val description : String,
-    val workflowUri : String,
+    val description: String,
+    val workflowUri: String,
     val isAsset: Boolean
-) {
-}
+)
 
 val workflows = listOf(
     WorkflowFile(

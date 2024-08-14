@@ -45,7 +45,6 @@ import com.eltonkola.comfyflux.app.MainViewModel
 import com.eltonkola.comfyflux.app.components.LoadingUi
 import com.eltonkola.comfyflux.app.model.HistoryItem
 import com.eltonkola.comfyflux.ui.theme.Ikona
-import com.eltonkola.comfyflux.ui.theme.ikona.Cancel
 import com.eltonkola.comfyflux.ui.theme.ikona.Copy
 import com.eltonkola.comfyflux.ui.theme.ikona.Delete
 import com.eltonkola.comfyflux.ui.theme.ikona.Error
@@ -54,12 +53,12 @@ import com.eltonkola.comfyflux.ui.theme.ikona.Refresh
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HistoryTab( viewModel: MainViewModel, navController: NavController) {
+fun HistoryTab(viewModel: MainViewModel, navController: NavController) {
 
     val uiState by viewModel.historyUiState.collectAsState()
 
     LaunchedEffect(key1 = Unit) {
-        if(uiState.history.isEmpty()) {
+        if (uiState.history.isEmpty()) {
             viewModel.loadHistory()
         }
     }
@@ -69,7 +68,7 @@ fun HistoryTab( viewModel: MainViewModel, navController: NavController) {
             TopAppBar(
                 title = { Text("All images on server") },
                 actions = {
-                    if(uiState.silentLoading){
+                    if (uiState.silentLoading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp)
                         )
@@ -79,19 +78,23 @@ fun HistoryTab( viewModel: MainViewModel, navController: NavController) {
                             imageVector = Ikona.Refresh,
                             contentDescription = null,
                             modifier = Modifier.size(24.dp)
-                            )
+                        )
                     }
                 }
             )
         }
     ) {
-        Box(modifier = Modifier
-            .padding(it)
-            .fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
             if (uiState.loading) {
-                LoadingUi(modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp))
+                LoadingUi(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                )
             } else if (uiState.error) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally
@@ -118,7 +121,7 @@ fun HistoryTab( viewModel: MainViewModel, navController: NavController) {
 
                             },
                                 onDelete = {
-                                viewModel.deleteHistory(row.id)
+                                    viewModel.deleteHistory(row.id)
                                 }
                             )
                             Spacer(modifier = Modifier.size(1.dp))
@@ -133,67 +136,76 @@ fun HistoryTab( viewModel: MainViewModel, navController: NavController) {
 
 @SuppressLint("SuspiciousIndentation")
 @Composable
-fun HistoryRowUi(item: HistoryItem, openImage:(List<String>, Int) -> Unit, onDelete : () -> Unit) {
+fun HistoryRowUi(item: HistoryItem, openImage: (List<String>, Int) -> Unit, onDelete: () -> Unit) {
     val clipboardManager = LocalClipboardManager.current
-        Column {
-            Text(text = "Nr: ${item.images.size} success: ${item.success} - completed: ${item.completed}")
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                if(item.images.isNotEmpty()) {
-                    items(item.images) { image ->
-                        AsyncImage(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable {
-                                    openImage(item.images, item.images.indexOf(image))
-                                }
-                                .background(MaterialTheme.colorScheme.secondary),
-                            model = image,
-                            contentDescription = null,
+    Column {
+        Text(text = "Nr: ${item.images.size} success: ${item.success} - completed: ${item.completed}")
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            if (item.images.isNotEmpty()) {
+                items(item.images) { image ->
+                    AsyncImage(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable {
+                                openImage(item.images, item.images.indexOf(image))
+                            }
+                            .background(MaterialTheme.colorScheme.secondary),
+                        model = image,
+                        contentDescription = null,
+                    )
+                }
+            } else {
+                item {
+                    Box(
+                        modifier = Modifier
+                            .size(120.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(MaterialTheme.colorScheme.secondary),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Ikona.Image,
+                            contentDescription = "failed",
+                            tint = MaterialTheme.colorScheme.onSecondary
                         )
                     }
-                }else{
-                 item{
-                  Box(modifier = Modifier
-                      .size(120.dp)
-                      .clip(RoundedCornerShape(10.dp))
-                      .background(MaterialTheme.colorScheme.secondary),
-                      contentAlignment = Alignment.Center
-                  ){
-                      Icon(
-                          imageVector = Ikona.Image,
-                          contentDescription = "failed",
-                          tint = MaterialTheme.colorScheme.onSecondary
-                      )
-                  }
-                 }
                 }
-                item {
-                    Row {
-                        Text(
-                            modifier = Modifier.width(240.dp),
-                            text = item.prompt.getPrompt(),
-                            fontSize = 10.sp
-                        )
-                        Column {
+            }
+            item {
+                Row {
+                    Text(
+                        modifier = Modifier.width(240.dp),
+                        text = item.prompt.getPrompt(),
+                        fontSize = 10.sp
+                    )
+                    Column {
 
 
-                            IconButton(onClick = {
-                                clipboardManager.setText(AnnotatedString(item.prompt.getPrompt()))
-                            }) {
-                                Icon(imageVector = Ikona.Copy, contentDescription = "copy", modifier = Modifier.size(24.dp))
-                            }
+                        IconButton(onClick = {
+                            clipboardManager.setText(AnnotatedString(item.prompt.getPrompt()))
+                        }) {
+                            Icon(
+                                imageVector = Ikona.Copy,
+                                contentDescription = "copy",
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
 
-                            IconButton(onClick = {
-                                onDelete()
-                            }) {
-                                Icon(imageVector = Ikona.Delete, contentDescription = "delete", modifier = Modifier.size(24.dp))
-                            }
+                        IconButton(onClick = {
+                            onDelete()
+                        }) {
+                            Icon(
+                                imageVector = Ikona.Delete,
+                                contentDescription = "delete",
+                                modifier = Modifier.size(24.dp)
+                            )
                         }
                     }
                 }
             }
         }
+    }
 }

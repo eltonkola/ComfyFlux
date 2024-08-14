@@ -61,9 +61,9 @@ fun PhotoViewerScreen(
 
     var showDialog by remember { mutableStateOf(false) }
 
-    if(showDialog){
-        PhotoZoomDialog(photoUrl = currentImageUrl){
-             showDialog = false
+    if (showDialog) {
+        PhotoZoomDialog(photoUrl = currentImageUrl) {
+            showDialog = false
         }
     }
     Scaffold(
@@ -119,7 +119,8 @@ fun PhotoViewerScreen(
         },
     ) { paddingValues ->
 
-        val pagerState = rememberPagerState(initialPage = uiState.selected, pageCount = { uiState.images.size } )
+        val pagerState =
+            rememberPagerState(initialPage = uiState.selected, pageCount = { uiState.images.size })
 
         HorizontalPager(
             state = pagerState,
@@ -139,7 +140,9 @@ fun PhotoViewerScreen(
                     model = uiState.images[image],
                     contentDescription = "Image ${image + 1}",
                     contentScale = ContentScale.Fit,
-                    modifier = Modifier.fillMaxSize().clickable { showDialog = true }
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable { showDialog = true }
                 )
             }
 
@@ -152,16 +155,24 @@ private fun share(context: Context, uri: Uri) {
     intent.type = "image/*"
     intent.putExtra(Intent.EXTRA_STREAM, uri)
     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    context.startActivity(Intent.createChooser(intent,"Share Image"))
+    context.startActivity(Intent.createChooser(intent, "Share Image"))
 }
 
-suspend fun saveImageToDownloads(context: Context, imageUrl: String, filename: String, share: Boolean = false) {
+suspend fun saveImageToDownloads(
+    context: Context,
+    imageUrl: String,
+    filename: String,
+    share: Boolean = false
+) {
     withContext(Dispatchers.IO) {
         val resolver = context.contentResolver
         val contentValues = ContentValues().apply {
             put(MediaStore.Images.Media.DISPLAY_NAME, filename)
             put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            put(MediaStore.Images.Media.RELATIVE_PATH, "Pictures/${context.getString(R.string.app_name)}")
+            put(
+                MediaStore.Images.Media.RELATIVE_PATH,
+                "Pictures/${context.getString(R.string.app_name)}"
+            )
         }
 
         try {
@@ -184,11 +195,13 @@ suspend fun saveImageToDownloads(context: Context, imageUrl: String, filename: S
                         if (share) {
                             share(context, uri)
                         }
-                        Toast.makeText(context, "Image saved to Pictures", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Image saved to Pictures", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 } ?: run {
                     withContext(Dispatchers.Main) {
-                        Toast.makeText(context, "Failed to open output stream", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "Failed to open output stream", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
             } ?: run {

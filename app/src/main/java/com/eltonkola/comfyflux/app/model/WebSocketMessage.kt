@@ -1,6 +1,5 @@
 package com.eltonkola.comfyflux.app.model
 
-import android.util.Log
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -17,8 +16,6 @@ sealed class WSMessage {
         val number: Int,
         val nodeErrors: Map<String, String> = emptyMap()
     ) : WSMessage()
-
-
 
 
     @Serializable
@@ -114,5 +111,5 @@ sealed class WSMessage {
     }
 
     @Serializable
-    private data class BaseMessage(val type: String?=null)
+    private data class BaseMessage(val type: String? = null)
 }

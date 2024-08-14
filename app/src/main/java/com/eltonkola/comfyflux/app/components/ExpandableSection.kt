@@ -24,13 +24,12 @@ import androidx.compose.ui.unit.dp
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.ArrowDown
 import com.eltonkola.comfyflux.ui.theme.ikona.Package
-import com.eltonkola.comfyflux.ui.theme.ikona.WorkflowIc
 
 @Composable
 fun ExpandableSection(
     title: String,
     expanded: Boolean,
-    onExpand:() -> Unit,
+    onExpand: () -> Unit,
     content: @Composable ColumnScope.() -> Unit
 ) {
 
@@ -51,17 +50,17 @@ fun ExpandableSection(
                 .background(MaterialTheme.colorScheme.secondaryContainer)
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Icon(
                 imageVector = Ikona.Package,
                 contentDescription = null,
                 modifier = Modifier.size(24.dp)
-                )
+            )
             Spacer(modifier = Modifier.size(8.dp))
             Text(
                 text = title,
                 modifier = Modifier.weight(1f)
-                )
+            )
             Spacer(modifier = Modifier.size(8.dp))
             Icon(
                 imageVector = Ikona.ArrowDown,
@@ -72,9 +71,11 @@ fun ExpandableSection(
                     .rotate(if (expanded) 180f else 0f)
             )
         }
-        if(expanded){
+        if (expanded) {
             Column(
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
             ) {
                 content()
             }
@@ -85,14 +86,14 @@ fun ExpandableSection(
 
 @Preview
 @Composable
-fun ExpandableSectionPreview(){
+fun ExpandableSectionPreview() {
     Column {
 
         ExpandableSection(
             expanded = true,
             title = "Local",
             onExpand = {}
-        ){
+        ) {
             Spacer(modifier = Modifier.size(80.dp))
             Text(text = "something")
             Spacer(modifier = Modifier.size(80.dp))
@@ -103,7 +104,7 @@ fun ExpandableSectionPreview(){
             expanded = false,
             title = "Local",
             onExpand = {}
-        ){
+        ) {
             Spacer(modifier = Modifier.size(80.dp))
             Text(text = "something")
             Spacer(modifier = Modifier.size(80.dp))

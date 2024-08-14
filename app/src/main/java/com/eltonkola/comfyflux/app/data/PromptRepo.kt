@@ -12,8 +12,10 @@ class PromptRepo(context: Context) {
             override suspend fun load(params: LoadParams<Int>): LoadResult<Int, String> {
                 val position = params.key ?: 0
                 val db = dbHelper.readableDatabase
-                val cursor = db.rawQuery("SELECT * FROM prompts_table WHERE Prompt LIKE ? LIMIT ? OFFSET ?",
-                    arrayOf("%$query%", params.loadSize.toString(), position.toString()))
+                val cursor = db.rawQuery(
+                    "SELECT * FROM prompts_table WHERE Prompt LIKE ? LIMIT ? OFFSET ?",
+                    arrayOf("%$query%", params.loadSize.toString(), position.toString())
+                )
                 val lines = mutableListOf<String>()
                 if (cursor.moveToFirst()) {
                     do {

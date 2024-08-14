@@ -12,7 +12,7 @@ fun LoadingUi(modifier: Modifier = Modifier.fillMaxSize()) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center
-    ){
+    ) {
         CircularProgressIndicator()
     }
 }
