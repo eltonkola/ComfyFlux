@@ -8,7 +8,7 @@ data class HistoryResponse(
     val prompt: List<JsonElement>,
     val outputs: Map<String, Output>,
     val status: Status
-){
+) {
 
     @Serializable
     data class Output(

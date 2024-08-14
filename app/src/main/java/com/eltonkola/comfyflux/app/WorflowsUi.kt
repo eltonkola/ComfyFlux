@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.eltonkola.comfyflux.app.components.ExpandableSection
+import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
 import com.eltonkola.comfyflux.app.model.WorkflowFile
 import com.eltonkola.comfyflux.app.model.workflows
 import com.eltonkola.comfyflux.ui.theme.Ikona
@@ -41,7 +42,8 @@ fun WorkflowsUi(onSelect: (WorkflowFile) -> Unit, uiState: ImageGenerationUiStat
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp)) {
+            .padding(8.dp)
+    ) {
         Text(
             text = "Workflows",
             style = MaterialTheme.typography.headlineMedium
@@ -57,10 +59,10 @@ fun WorkflowsUi(onSelect: (WorkflowFile) -> Unit, uiState: ImageGenerationUiStat
             expanded = samplesOpen,
             title = "Sample Workflows",
             onExpand = { samplesOpen = !samplesOpen }
-        ){
+        ) {
 
             LazyColumn {
-                items(workflows){
+                items(workflows) {
                     WorkflowRow(it, uiState.workflow == it, onSelect)
                     Spacer(modifier = Modifier.size(4.dp))
                 }
@@ -72,8 +74,8 @@ fun WorkflowsUi(onSelect: (WorkflowFile) -> Unit, uiState: ImageGenerationUiStat
         ExpandableSection(
             expanded = localOpen,
             title = "Local Workflows",
-            onExpand = { localOpen = !localOpen}
-        ){
+            onExpand = { localOpen = !localOpen }
+        ) {
             Text(
                 text = "Your local workflows.",
                 style = MaterialTheme.typography.bodyMedium
@@ -90,9 +92,8 @@ fun WorkflowsUi(onSelect: (WorkflowFile) -> Unit, uiState: ImageGenerationUiStat
 }
 
 
-
 @Composable
-fun WorkflowRow(workflow: WorkflowFile, selected: Boolean, onSelect: (WorkflowFile) -> Unit){
+fun WorkflowRow(workflow: WorkflowFile, selected: Boolean, onSelect: (WorkflowFile) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
@@ -115,9 +116,9 @@ fun WorkflowRow(workflow: WorkflowFile, selected: Boolean, onSelect: (WorkflowFi
             imageVector = Ikona.WorkflowIc,
             contentDescription = null
         )
-        Column (
+        Column(
             modifier = Modifier.weight(1f)
-        ){
+        ) {
             Text(
                 text = workflow.name,
                 style = MaterialTheme.typography.bodyMedium
@@ -130,6 +131,7 @@ fun WorkflowRow(workflow: WorkflowFile, selected: Boolean, onSelect: (WorkflowFi
         Icon(
             modifier = Modifier.size(24.dp),
             imageVector = Ikona.ArrowRight,
-            contentDescription = null)
+            contentDescription = null
+        )
     }
 }

@@ -11,12 +11,13 @@ data class SettingsState(
     val dark: Boolean,
     val system: Boolean,
     val dynamicColor: Boolean,
-    val grqApiKey : String
+    val grqApiKey: String
 )
 
 class AppSettings(private val sharedPreferences: SharedPreferences) {
 
-    private val _settingsState = MutableStateFlow(SettingsState(isDarkTheme(), isSystemTheme(), isDynamicColor(), groqApi()))
+    private val _settingsState =
+        MutableStateFlow(SettingsState(isDarkTheme(), isSystemTheme(), isDynamicColor(), groqApi()))
     val settingsState: StateFlow<SettingsState> = _settingsState.asStateFlow()
 
     companion object {
@@ -28,12 +29,12 @@ class AppSettings(private val sharedPreferences: SharedPreferences) {
 
     fun groqApi(): String {
         val key = sharedPreferences.getString(GROQ_KEY, "")
-        Log.d( "appSettings", "groqApiKey: $key" )
+        Log.d("appSettings", "groqApiKey: $key")
         return key ?: ""
     }
 
     fun setGroqApiKey(key: String) {
-        Log.d( "appSettings", "setAccountExists: $key")
+        Log.d("appSettings", "setAccountExists: $key")
         sharedPreferences.edit().putString(GROQ_KEY, key).apply()
         _settingsState.update { it.copy(grqApiKey = key) }
     }

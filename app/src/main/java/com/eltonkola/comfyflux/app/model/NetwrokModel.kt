@@ -6,13 +6,14 @@ import kotlinx.serialization.Serializable
 data class SystemStats(
     val system: System,
     val devices: List<Device>
-){
+) {
     @Serializable
     data class System(
         val os: String,
         val python_version: String,
         val embedded_python: Boolean
     )
+
     @Serializable
     data class Device(
         val name: String,
@@ -21,12 +22,12 @@ data class SystemStats(
         val vram_free: Long,
         val torch_vram_total: Long,
         val torch_vram_free: Long,
-        val index : Int? = null
+        val index: Int? = null
     )
 }
 
 @Serializable
 data class PromptRequest(
     val client_id: String,
-    val prompt : Workflow
+    val prompt: Workflow
 )

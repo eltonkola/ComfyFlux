@@ -1,20 +1,26 @@
 package com.eltonkola.comfyflux.app.model
 
-import com.eltonkola.comfyflux.app.cleanPrompt
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.descriptors.buildClassSerialDescriptor
+import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonDecoder
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonEncoder
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.serialization.json.jsonObject
 
-import kotlinx.serialization.*
-import kotlinx.serialization.descriptors.*
-import kotlinx.serialization.encoding.*
-import kotlinx.serialization.json.*
-
-//@Serializer(forClass = Workflow::class)
 object WorkflowSerializer : KSerializer<Workflow> {
     override val descriptor: SerialDescriptor =
         buildClassSerialDescriptor("Workflow") {
@@ -22,13 +28,15 @@ object WorkflowSerializer : KSerializer<Workflow> {
         }
 
     override fun serialize(encoder: Encoder, value: Workflow) {
-        val jsonEncoder = encoder as? JsonEncoder ?: throw SerializationException("This serializer can be used only with Json format")
+        val jsonEncoder = encoder as? JsonEncoder
+            ?: throw SerializationException("This serializer can be used only with Json format")
         val jsonObject = JsonObject(value.mapValues { (_, node) -> Json.encodeToJsonElement(node) })
         encoder.encodeJsonElement(jsonObject)
     }
 
     override fun deserialize(decoder: Decoder): Workflow {
-        val jsonDecoder = decoder as? JsonDecoder ?: throw SerializationException("This serializer can be used only with Json format")
+        val jsonDecoder = decoder as? JsonDecoder
+            ?: throw SerializationException("This serializer can be used only with Json format")
         val jsonObject = jsonDecoder.decodeJsonElement().jsonObject
         return Workflow().apply {
             putAll(jsonObject.mapValues { (_, value) ->
@@ -41,7 +49,7 @@ object WorkflowSerializer : KSerializer<Workflow> {
 @Serializable(with = WorkflowSerializer::class)
 class Workflow : MutableMap<String, Node<JsonElement>> by mutableMapOf() {
 
-    companion object{
+    companion object {
         const val SIZE = "5" // width, height, batch nr
         const val PROMPT = "6" //prompt
         const val KSAMPLER = "3" //it has seed
@@ -87,7 +95,7 @@ class Workflow : MutableMap<String, Node<JsonElement>> by mutableMapOf() {
 
 @Serializable
 data class Node<T>(
-    val inputs : T,
+    val inputs: T,
     @SerialName("class_type")
     val classType: String,
     @SerialName("_meta")
@@ -114,7 +122,7 @@ data class PromptInputs(
 )
 
 
-fun Workflow.updateSizeAndBatch(width: Int, height: Int, batchSize: Int){
+fun Workflow.updateSizeAndBatch(width: Int, height: Int, batchSize: Int) {
     this.updateTypedNode<SizeInputs>(Workflow.SIZE) { node ->
         node.copy(
             inputs = node.inputs.copy(
@@ -126,7 +134,7 @@ fun Workflow.updateSizeAndBatch(width: Int, height: Int, batchSize: Int){
     }
 }
 
-fun Workflow.updatePrompt(prompt: String ){
+fun Workflow.updatePrompt(prompt: String) {
     this.updateTypedNode<PromptInputs>(Workflow.PROMPT) { node ->
         node.copy(
             inputs = node.inputs.copy(
@@ -151,11 +159,11 @@ fun updateSeed(node: Node<JsonElement>, seedKey: String, newSeed: Long): Node<Js
     return node.copy(inputs = updatedInputs)
 }
 
-fun Workflow.updateSeed(seed: Long ){
-    this.updateNode(Workflow.KSAMPLER, ) { node ->
+fun Workflow.updateSeed(seed: Long) {
+    this.updateNode(Workflow.KSAMPLER) { node ->
         updateSeed(node, "seed", seed)
     }
-    this.updateNode(Workflow.RANDOMNOISE, ) { node ->
+    this.updateNode(Workflow.RANDOMNOISE) { node ->
         updateSeed(node, "noise_seed", seed)
     }
 }

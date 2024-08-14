@@ -79,7 +79,7 @@ data class ApiResponse(
 
 class GroqAPI(private val appSettings: AppSettings) {
 
-    companion object{
+    companion object {
         private const val SHARED_API_KEY = BuildConfig.GROQ_API_KEY
     }
 
@@ -104,8 +104,14 @@ class GroqAPI(private val appSettings: AppSettings) {
 
         val requestBody = RequestBody(
             messages = listOf(
-                Message("system", "You are a creative assistant specialized in enhancing image generation prompts. Your task is to take a short prompt and expand it into a more detailed and vivid description, suitable for AI image generation."),
-                Message("user", "Please enrich this image generation prompt: '$initialPrompt', return the prompt only, without anything else")
+                Message(
+                    "system",
+                    "You are a creative assistant specialized in enhancing image generation prompts. Your task is to take a short prompt and expand it into a more detailed and vivid description, suitable for AI image generation."
+                ),
+                Message(
+                    "user",
+                    "Please enrich this image generation prompt: '$initialPrompt', return the prompt only, without anything else"
+                )
             ),
             model = "mixtral-8x7b-32768",
             temperature = 0.7,
@@ -118,7 +124,7 @@ class GroqAPI(private val appSettings: AppSettings) {
         val response: HttpResponse = client.post(url) {
             header(HttpHeaders.Authorization, "Bearer $apiKey")
             contentType(ContentType.Application.Json)
-            body =  jsonBody
+            body = jsonBody
         }
 
         val responseBody = response.bodyAsText()

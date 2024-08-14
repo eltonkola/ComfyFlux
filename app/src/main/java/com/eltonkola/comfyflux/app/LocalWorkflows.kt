@@ -1,6 +1,5 @@
 package com.eltonkola.comfyflux.app
 
-import android.R.attr.maxLines
 import android.app.Application
 import android.content.Intent
 import android.net.Uri
@@ -9,7 +8,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,6 +36,7 @@ import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
 import com.eltonkola.comfyflux.app.model.WorkflowFile
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.Error
@@ -62,7 +69,10 @@ class FolderViewModel(application: Application) : AndroidViewModel(application) 
             // Take persistent permission immediately
             val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
-            getApplication<Application>().contentResolver.takePersistableUriPermission(uri, takeFlags)
+            getApplication<Application>().contentResolver.takePersistableUriPermission(
+                uri,
+                takeFlags
+            )
 
             if (checkPermission(uri)) {
                 Log.d("FolderViewModel", "Permission granted for URI: $uri")
@@ -83,12 +93,18 @@ class FolderViewModel(application: Application) : AndroidViewModel(application) 
     }
 
     private fun saveSelectedFolderUri(uri: Uri) {
-        val sharedPreferences = getApplication<Application>().getSharedPreferences("FolderPrefs", Application.MODE_PRIVATE)
+        val sharedPreferences = getApplication<Application>().getSharedPreferences(
+            "FolderPrefs",
+            Application.MODE_PRIVATE
+        )
         sharedPreferences.edit().putString("SELECTED_FOLDER_URI", uri.toString()).apply()
     }
 
     private fun loadSavedFolder() {
-        val sharedPreferences = getApplication<Application>().getSharedPreferences("FolderPrefs", Application.MODE_PRIVATE)
+        val sharedPreferences = getApplication<Application>().getSharedPreferences(
+            "FolderPrefs",
+            Application.MODE_PRIVATE
+        )
         val savedUriString = sharedPreferences.getString("SELECTED_FOLDER_URI", null)
         savedUriString?.let {
             val uri = Uri.parse(it)
@@ -112,7 +128,7 @@ class FolderViewModel(application: Application) : AndroidViewModel(application) 
 
 }
 
-fun DocumentFile.normalize(): WorkflowFile{
+fun DocumentFile.normalize(): WorkflowFile {
     return WorkflowFile(
         name = this.name ?: "",
         description = "Local workflow",
@@ -123,7 +139,11 @@ fun DocumentFile.normalize(): WorkflowFile{
 
 
 @Composable
-fun LocalWorkflows(uiState: ImageGenerationUiState, onClick: (WorkflowFile) -> Unit, viewModel: FolderViewModel = viewModel()) {
+fun LocalWorkflows(
+    uiState: ImageGenerationUiState,
+    onClick: (WorkflowFile) -> Unit,
+    viewModel: FolderViewModel = viewModel()
+) {
     val files by viewModel.files.collectAsState()
     val selectedFolder by viewModel.selectedFolder.collectAsState()
     val hasPermission by viewModel.hasPermission.collectAsState()
@@ -150,8 +170,7 @@ fun LocalWorkflows(uiState: ImageGenerationUiState, onClick: (WorkflowFile) -> U
                     )
                     .clip(RoundedCornerShape(4.dp))
                     .background(MaterialTheme.colorScheme.tertiaryContainer)
-                    .padding(start = 4.dp)
-                ,
+                    .padding(start = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
 
@@ -183,15 +202,15 @@ fun LocalWorkflows(uiState: ImageGenerationUiState, onClick: (WorkflowFile) -> U
             Spacer(modifier = Modifier.height(6.dp))
 
             LazyColumn {
-                items(files){
+                items(files) {
                     WorkflowRow(it, uiState.workflow == it, onClick)
                     Spacer(modifier = Modifier.size(4.dp))
                 }
             }
 
-            if(files.isEmpty()){
+            if (files.isEmpty()) {
                 Column(
-                    horizontalAlignment =  Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Spacer(modifier = Modifier.size(8.dp))
                     Icon(
@@ -217,7 +236,6 @@ fun LocalWorkflows(uiState: ImageGenerationUiState, onClick: (WorkflowFile) -> U
 
                 }
             }
-
 
 
         } else {

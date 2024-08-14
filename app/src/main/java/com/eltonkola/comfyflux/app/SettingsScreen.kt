@@ -63,134 +63,152 @@ fun SettingsScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(imageVector = Ikona.Back, contentDescription = "Back", modifier = Modifier.size(24.dp))
+                        Icon(
+                            imageVector = Ikona.Back,
+                            contentDescription = "Back",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
             )
         }
     ) {
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(it)
-                    .padding(16.dp),
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+                .padding(16.dp),
+        ) {
 
+            Text(
+                text = "System theme: ${if (uiState.system) "On" else "Off"}",
+                fontSize = 20.sp
+            )
+            Switch(
+                checked = uiState.system,
+                onCheckedChange = {
+                    viewModel.updateSystemTheme(it)
+                }
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            if (!uiState.system) {
                 Text(
-                    text = "System theme: ${if (uiState.system) "On" else "Off"}",
+                    text = "Dark Mode: ${if (uiState.dark) "On" else "Off"}",
                     fontSize = 20.sp
                 )
                 Switch(
-                    checked = uiState.system,
+                    checked = uiState.dark,
                     onCheckedChange = {
-                        viewModel.updateSystemTheme(it)
+                        viewModel.updateDarkTheme(it)
                     }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                if(!uiState.system) {
-                    Text(
-                        text = "Dark Mode: ${if (uiState.dark) "On" else "Off"}",
-                        fontSize = 20.sp
-                    )
-                    Switch(
-                        checked = uiState.dark,
-                        onCheckedChange = {
-                            viewModel.updateDarkTheme(it)
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+            }
 
-                //dynamic colors are on android 12+
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    Text(
-                        text = "Dynamic color: ${if (uiState.dynamicColor) "On" else "Off"}",
-                        fontSize = 20.sp
-                    )
-                    Switch(
-                        checked = uiState.dynamicColor,
-                        onCheckedChange = {
-                            viewModel.updateDynamicColor(it)
-                        }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
-
-
-
+            //dynamic colors are on android 12+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 Text(
-                    text = "GROQ Api Key",
+                    text = "Dynamic color: ${if (uiState.dynamicColor) "On" else "Off"}",
                     fontSize = 20.sp
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "If you use a wrong api key, calls will silently fail.",
-                    fontSize = 16.sp
+                Switch(
+                    checked = uiState.dynamicColor,
+                    onCheckedChange = {
+                        viewModel.updateDynamicColor(it)
+                    }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
+            }
 
-                    TextField(
-                        label = {
-                            Text(text = "GROQ API KEY")
-                        },
-                          supportingText = {
-                              Text(text = "Leave empty for the default one")
-                          },      
-                        value = uiState.grqApiKey,
-                        onValueChange = {
-                            viewModel.setGrqApiKey(it)
-                        },
-                        readOnly = true,
-                        maxLines = 2,
-                        textStyle = TextStyle(fontSize = 10.sp),
-                        modifier = Modifier.fillMaxWidth(),
-                        trailingIcon = {
-                            IconButton({
-                                clipboardManager.getText()?.let{
-                                    viewModel.setGrqApiKey(it.text)
-                                }
-                            }) {
-                                Icon(imageVector = Ikona.Paste, contentDescription = "Paste", modifier = Modifier.size(24.dp))
-                            }
-                        },
-                        leadingIcon = {
-                            Icon(imageVector = Ikona.Key, contentDescription = "Key", modifier = Modifier.size(24.dp))
+
+
+            Text(
+                text = "GROQ Api Key",
+                fontSize = 20.sp
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "If you use a wrong api key, calls will silently fail.",
+                fontSize = 16.sp
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            TextField(
+                label = {
+                    Text(text = "GROQ API KEY")
+                },
+                supportingText = {
+                    Text(text = "Leave empty for the default one")
+                },
+                value = uiState.grqApiKey,
+                onValueChange = {
+                    viewModel.setGrqApiKey(it)
+                },
+                readOnly = true,
+                maxLines = 2,
+                textStyle = TextStyle(fontSize = 10.sp),
+                modifier = Modifier.fillMaxWidth(),
+                trailingIcon = {
+                    IconButton({
+                        clipboardManager.getText()?.let {
+                            viewModel.setGrqApiKey(it.text)
                         }
-                    )
-
-                
-                Spacer(modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f))
-                val context = LocalContext.current
-                Column(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.logo), contentDescription = "logo")
-                    Text(
-                        text = stringResource(id = R.string.app_name),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                    Text(
-                        text = stringResource(id = R.string.about_version, context.getVersionNameAndCode()),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                    Text(
-                        text = stringResource(id = R.string.about_body),
-                        style = MaterialTheme.typography.labelSmall
-                    )
-                    val link = stringResource(id = R.string.about_link)
-                    TextButton(onClick = { context.openLinkInBrowser(link) }) {
-                        Text(text = link)
+                    }) {
+                        Icon(
+                            imageVector = Ikona.Paste,
+                            contentDescription = "Paste",
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Ikona.Key,
+                        contentDescription = "Key",
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            )
 
+
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            )
+            val context = LocalContext.current
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.logo), contentDescription = "logo"
+                )
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    style = MaterialTheme.typography.labelLarge
+                )
+                Text(
+                    text = stringResource(
+                        id = R.string.about_version,
+                        context.getVersionNameAndCode()
+                    ),
+                    style = MaterialTheme.typography.labelMedium
+                )
+                Text(
+                    text = stringResource(id = R.string.about_body),
+                    style = MaterialTheme.typography.labelSmall
+                )
+                val link = stringResource(id = R.string.about_link)
+                TextButton(onClick = { context.openLinkInBrowser(link) }) {
+                    Text(text = link)
                 }
 
             }
+
+        }
 
     }
 
@@ -199,8 +217,7 @@ fun SettingsScreen(
 fun Context.getVersionNameAndCode(): String {
     val packageInfo: PackageInfo? = try {
         packageManager.getPackageInfo(packageName, 0)
-    } catch (e: PackageManager.NameNotFoundException)
-    {
+    } catch (e: PackageManager.NameNotFoundException) {
         null
     }
 

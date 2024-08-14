@@ -41,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -51,6 +50,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.eltonkola.comfyflux.R
+import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
 import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.ui.theme.Ikona
 import com.eltonkola.comfyflux.ui.theme.ikona.ArrowDown
@@ -85,7 +85,7 @@ fun CreateUi(
             Text(
                 text = stringResource(R.string.server_disconnected),
                 modifier = Modifier.padding(16.dp)
-                )
+            )
 
         } else {
 
@@ -146,7 +146,10 @@ fun CreateUi(
 
                 if (progressUiState.generatedImages.isNotEmpty()) {
                     ImageGrid(images = progressUiState.generatedImages) {
-                        viewModel.viewImage(progressUiState.generatedImages, progressUiState.generatedImages.indexOf(it))
+                        viewModel.viewImage(
+                            progressUiState.generatedImages,
+                            progressUiState.generatedImages.indexOf(it)
+                        )
                         navController.navigate(AppScreens.ImageViewer.screenName)
                     }
                 } else {
@@ -177,15 +180,15 @@ fun CreateUi(
                         verticalArrangement = Arrangement.Center
                     ) {
 
-                        if(progressUiState.maxProgress > 0) {
+                        if (progressUiState.maxProgress > 0) {
                             CircularProgressIndicator(
                                 progress = {
                                     progressUiState.partialProgress()
                                 },
                                 modifier = Modifier.size(64.dp),
                                 color = MaterialTheme.colorScheme.onSecondary,
-                                )
-                        }else{
+                            )
+                        } else {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(64.dp),
                                 color = MaterialTheme.colorScheme.onSecondary
@@ -226,9 +229,11 @@ fun CreateUi(
 }
 
 @Composable
-fun PromptTab(uiState: ImageGenerationUiState,
-              progressUiState : ProgressGenerationUIState,
-              viewModel: MainViewModel) {
+fun PromptTab(
+    uiState: ImageGenerationUiState,
+    progressUiState: ProgressGenerationUIState,
+    viewModel: MainViewModel
+) {
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Column(
@@ -252,7 +257,7 @@ fun PromptTab(uiState: ImageGenerationUiState,
             keyboardActions = KeyboardActions(
                 onDone = {
                     keyboardController?.hide()
-                    if (! progressUiState.executing) {
+                    if (!progressUiState.executing) {
                         viewModel.generateImages()
                     }
                 }
@@ -294,7 +299,7 @@ fun PromptTab(uiState: ImageGenerationUiState,
                     }
                     IconButton(
                         onClick = {
-                            clipboard.getText()?.let{
+                            clipboard.getText()?.let {
                                 viewModel.updatePrompt(uiState.prompt + it)
                             }
                         }
@@ -418,7 +423,7 @@ fun ImageSizeSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel)
                 Text(
                     text = "${imageSizes[widthIndex]}x${imageSizes[heightIndex]}Px",
                     color = MaterialTheme.colorScheme.onPrimary
-                    )
+                )
             }
         }
 
@@ -486,8 +491,8 @@ fun SeedSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
                 if (it.all { char -> char.isDigit() }) {
                     try {
                         viewModel.setSeed(it.toLong(), uiState.isRandom)
-                    } catch (e: Exception){
-                      //empty seed, dont change it
+                    } catch (e: Exception) {
+                        //empty seed, dont change it
                     }
                 }
             },
@@ -503,7 +508,7 @@ fun SeedSelector(uiState: ImageGenerationUiState, viewModel: MainViewModel) {
                         imageVector = Ikona.Refresh,
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
-                        )
+                    )
                 }
             },
             leadingIcon = {

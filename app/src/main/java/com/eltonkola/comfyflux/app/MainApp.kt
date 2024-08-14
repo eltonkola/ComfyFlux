@@ -1,18 +1,16 @@
 package com.eltonkola.comfyflux.app
 
-import android.app.Application
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.eltonkola.comfyflux.ui.theme.ComfyFluxTheme
+import org.koin.androidx.compose.koinViewModel
 
-enum class AppScreens(val screenName: String){
+enum class AppScreens(val screenName: String) {
     Main("mainScreen"),
     ImageViewer("imageViewerScreen"),
     Settings("settingsScreen");
@@ -20,9 +18,7 @@ enum class AppScreens(val screenName: String){
 
 @Composable
 fun MainApp(
-    viewModel: MainViewModel = viewModel(
-        factory = MainViewModelFactory(LocalContext.current.applicationContext as Application)
-    )
+    viewModel: MainViewModel = koinViewModel()
 ) {
 
     val uiState by viewModel.uiState.collectAsState()
@@ -31,9 +27,9 @@ fun MainApp(
 
     val settings by viewModel.settingsState.collectAsState()
 
-    val isDark = if(settings.system){
+    val isDark = if (settings.system) {
         isSystemInDarkTheme()
-    }else{
+    } else {
         settings.dark
     }
     ComfyFluxTheme(

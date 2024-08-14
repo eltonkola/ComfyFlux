@@ -1,178 +1,108 @@
 package com.eltonkola.comfyflux.app
 
-import android.annotation.SuppressLint
 import android.app.Application
-import android.content.Context
-import android.net.Uri
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import com.eltonkola.comfyflux.app.data.AppSettings
 import com.eltonkola.comfyflux.app.data.PromptRepo
 import com.eltonkola.comfyflux.app.data.SettingsState
 import com.eltonkola.comfyflux.app.model.HistoryUiState
+import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
+import com.eltonkola.comfyflux.app.model.ImageViewerUiState
 import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
-import com.eltonkola.comfyflux.app.model.PromptRequest
 import com.eltonkola.comfyflux.app.model.Queue
 import com.eltonkola.comfyflux.app.model.QueueUiState
-import com.eltonkola.comfyflux.app.model.SystemStats
-import com.eltonkola.comfyflux.app.model.Workflow
 import com.eltonkola.comfyflux.app.model.WorkflowFile
-import com.eltonkola.comfyflux.app.model.updatePrompt
-import com.eltonkola.comfyflux.app.model.updateSeed
-import com.eltonkola.comfyflux.app.model.updateSizeAndBatch
-import com.eltonkola.comfyflux.app.model.workflows
-import com.eltonkola.comfyflux.app.netwrok.DEFAULT_URL
 import com.eltonkola.comfyflux.app.netwrok.FluxAPI
-import com.eltonkola.comfyflux.app.netwrok.GroqAPI
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.eltonkola.comfyflux.app.usecase.HistoryUseCase
+import com.eltonkola.comfyflux.app.usecase.ImageViewerUseCase
+import com.eltonkola.comfyflux.app.usecase.MainUseCase
+import com.eltonkola.comfyflux.app.usecase.PromptSearchUseCase
+import com.eltonkola.comfyflux.app.usecase.QueueUseCase
+import com.eltonkola.comfyflux.app.usecase.TimerUseCase
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import java.io.File
-import java.io.InputStream
-import java.nio.charset.Charset
-import kotlin.random.Random
-
-data class ImageGenerationUiState(
-    val prompt: String = "",
-    val server: String = DEFAULT_URL,
-
-    val loadingStats: Boolean = false,
-    val stats: SystemStats? = null,
-
-    val workflow: WorkflowFile = workflows.first(),
-    val width: Int = 512,
-    val height: Int = 512,
-    val batchSize: Int = 1,
-    val seed: Long = generateRandom16DigitNumber(),
-    val isRandom : Boolean = true
-)
-
-data class ImageViewerUiState(
-    val images: List<String> = emptyList(),
-    val selected: Int = 0
-)
-
-class MainViewModelFactory(private val application: Application) : ViewModelProvider.Factory {
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(MainViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST")
-            return MainViewModel(application) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}
 
 
 class MainViewModel(
     private val applicationContext: Application,
-    private val fluxAPI: FluxAPI = FluxAPI(),
-    ) : AndroidViewModel(applicationContext) {
+    private val fluxAPI: FluxAPI,
+    private val promptRepo: PromptRepo,
+    private val promptSearchUseCase: PromptSearchUseCase,
+    private val historyUseCase: HistoryUseCase,
+    private val imageViewerUseCase: ImageViewerUseCase,
+    private val queueUseCase: QueueUseCase,
+    private val mainUseCase: MainUseCase,
+    private val appSettings: AppSettings,
+    private val timerUseCase: TimerUseCase
+) : AndroidViewModel(applicationContext) {
 
-
-    private val repository = PromptRepo(applicationContext)
-    //prompt search
-    private val _pagingDataFlow = MutableStateFlow<PagingData<String>>(PagingData.empty())
-    val pagingDataFlow: StateFlow<PagingData<String>> = _pagingDataFlow
-
-
-    //main screen state
-    private val _uiState = MutableStateFlow(ImageGenerationUiState())
-    val uiState: StateFlow<ImageGenerationUiState> = _uiState.asStateFlow()
-
+    val promptSearchPaging: StateFlow<PagingData<String>> = promptSearchUseCase.promptSearchPaging
+    val historyUiState: StateFlow<HistoryUiState> = historyUseCase.historyUiState
     val progressUiState: StateFlow<ProgressGenerationUIState> = fluxAPI.progressUiState
-
-
-    //history state
-    private val _historyUiState = MutableStateFlow(HistoryUiState())
-    val historyUiState: StateFlow<HistoryUiState> = _historyUiState.asStateFlow()
-
-    //queue state
-    private val _queueUiState = MutableStateFlow(QueueUiState())
-    val queueUiState: StateFlow<QueueUiState> = _queueUiState.asStateFlow()
-
-    //image viewer
-    private val _imageUiState = MutableStateFlow(ImageViewerUiState())
-    val imageUiState: StateFlow<ImageViewerUiState> = _imageUiState.asStateFlow()
-
+    val imageUiState: StateFlow<ImageViewerUiState> = imageViewerUseCase.imageUiState
+    val queueUiState: StateFlow<QueueUiState> = queueUseCase.queueUiState
+    val uiState: StateFlow<ImageGenerationUiState> = mainUseCase.uiState
+    val settingsState: StateFlow<SettingsState> = appSettings.settingsState
+    val timer: StateFlow<String> = timerUseCase.timer
 
     init {
         checkStatus()
         searchLines("")
     }
 
-
     fun searchLines(query: String) {
         viewModelScope.launch {
-            Pager(
-                config = PagingConfig(pageSize = 100),
-                pagingSourceFactory = { repository.getPagingSource(query) }
-            ).flow.cachedIn(viewModelScope).collectLatest {
-                _pagingDataFlow.value = it
-            }
+            promptSearchUseCase.searchLines(query, viewModelScope)
         }
     }
 
-    fun updateSeverUrl(url: String){
+    fun updateSeverUrl(url: String) {
         viewModelScope.launch {
-            fluxAPI.setServerAddress(url)
-            _uiState.update { it.copy(server = url) }
+            mainUseCase.updateSeverUrl(url)
         }
     }
 
     fun viewImage(images: List<String> = emptyList(), selected: Int = 0) {
-        _imageUiState.value = ImageViewerUiState(images, selected)
+        imageViewerUseCase.viewImage(images, selected)
     }
 
-    fun updatePrompt(prompt: String){
+    fun updatePrompt(prompt: String) {
         viewModelScope.launch {
-            _uiState.update { it.copy(prompt = prompt) }
+            mainUseCase.updatePrompt(prompt)
         }
     }
 
-    fun updateWorkflow(workflow: WorkflowFile){
+    fun updateWorkflow(workflow: WorkflowFile) {
         viewModelScope.launch {
-            _uiState.update { it.copy(workflow = workflow) }
+            mainUseCase.updateWorkflow(workflow)
         }
     }
 
-    fun setImageWidth(width: Int){
+    fun setImageWidth(width: Int) {
         viewModelScope.launch {
-            _uiState.update { it.copy(width = width) }
+            mainUseCase.setImageWidth(width)
         }
     }
 
-    fun setImageHeight(height: Int){
+    fun setImageHeight(height: Int) {
         viewModelScope.launch {
-            _uiState.update { it.copy(height = height) }
+            mainUseCase.setImageHeight(height)
         }
     }
 
-    fun setBatchSize(batchSize: Int){
+    fun setBatchSize(batchSize: Int) {
         viewModelScope.launch {
-            _uiState.update { it.copy(batchSize = batchSize) }
+            mainUseCase.setBatchSize(batchSize)
         }
     }
 
-    fun setSeed(seed: Long, isRandom: Boolean){
+    fun setSeed(seed: Long, isRandom: Boolean) {
         viewModelScope.launch {
-            _uiState.update { it.copy(seed = seed, isRandom = isRandom) }
+            mainUseCase.setSeed(seed, isRandom)
         }
     }
-
 
     fun interruptImages() {
         viewModelScope.launch {
@@ -183,114 +113,49 @@ class MainViewModel(
 
     fun generateImages() {
         viewModelScope.launch {
-            if(uiState.value.prompt.isBlank()){
-                return@launch
-            }
-            resetTimer()
-            startTimer()
-            try {
-                val prompt = loadWorkflow()
-                Log.d("FluxApp", "prompt: $prompt")
-                withContext(Dispatchers.IO) {
-                    fluxAPI.generateImage(prompt)
+            mainUseCase.generateImages(
+                start = {
+                    viewModelScope.launch {
+                        timerUseCase.resetTimer()
+                        timerUseCase.startTimer()
+                    }
+                },
+                stop = {
+                    timerUseCase.stopTimer()
                 }
-                checkStatus()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            stopTimer()
+            )
         }
     }
 
-    fun enrichPrompt(){
+    fun enrichPrompt() {
         viewModelScope.launch {
-            try{
-                val richPrompt = groqAPI.enrichPrompt(uiState.value.prompt)
-                _uiState.update { it.copy(prompt = richPrompt) }
-
-            }catch (e: Exception){
-                e.printStackTrace()
-            }
+            mainUseCase.enrichPrompt()
         }
     }
 
-    fun checkStatus(){
-        _uiState.update { it.copy(loadingStats = true) }
+    fun checkStatus() {
         viewModelScope.launch {
-            val status = fluxAPI.checkSystemStats()
-            _uiState.update { it.copy(loadingStats = false, stats = status) }
-
+            mainUseCase.checkStatus()
         }
-
-    }
-
-    private fun loadWorkflow() : PromptRequest {
-
-        val seed = if(uiState.value.isRandom) {
-            val newSeed = generateRandom16DigitNumber()
-            _uiState.update { it.copy(seed = newSeed) }
-            newSeed
-        } else {
-            uiState.value.seed
-        }
-
-        val workflowConfig = _uiState.value.workflow
-        val workflowInput = applicationContext.getWorkflowAsText(workflowConfig) ?: throw Exception("Error reading workflow!")
-        val workflow = Json.decodeFromString<Workflow>(workflowInput)
-
-
-        workflow.updateSizeAndBatch(
-            width = uiState.value.width,
-            height = uiState.value.height,
-            batchSize = uiState.value.batchSize
-        )
-
-        workflow.updatePrompt(prompt = uiState.value.prompt.cleanPrompt())
-
-        workflow.updateSeed(seed = seed)
-
-        return PromptRequest(fluxAPI.clientId, workflow)
     }
 
     fun randomSeed() {
-        _uiState.update { it.copy(seed = generateRandom16DigitNumber()) }
+        mainUseCase.randomSeed()
     }
 
-
-
-    //history and queue
-
     fun loadHistory(silentUpdate: Boolean = false) {
-        if(silentUpdate) {
-            _historyUiState.update { it.copy(silentLoading = true) }
-        }else{
-            _historyUiState.update { it.copy(loading = true) }
-        }
         viewModelScope.launch {
-            try{
-                val history = fluxAPI.fetchHistory()
-                Log.d("HistoryQueueViewModel", "history: ${history.size}")
-                _historyUiState.update { it.copy(loading = false, history = history.reversed(), error = false, silentLoading = false) }
-            }catch (e: Exception){
-                _historyUiState.update { it.copy(loading = false, error = true, silentLoading =  false) }
+            historyUseCase.loadHistory(silentUpdate) {
+                checkStatus()
             }
-            checkStatus()
         }
     }
 
     fun loadQueue(showLoading: Boolean = true) {
-        if(showLoading) {
-            _queueUiState.update { it.copy(loading = true) }
-        }
         viewModelScope.launch {
-            try{
-                val queue = fluxAPI.fetchQueue()
-                Log.d("HistoryQueueViewModel", "queue pending: ${queue.pending.size}")
-                _queueUiState.update { it.copy(loading = false, queue = queue, error = false) }
-            }catch (e: Exception){
-                _queueUiState.update { it.copy(loading = false, error = true) }
+            queueUseCase.loadQueue(showLoading) {
+                checkStatus()
             }
-            checkStatus()
         }
     }
 
@@ -298,7 +163,6 @@ class MainViewModel(
         viewModelScope.launch {
             fluxAPI.cancelWorkflow(workflow.id)
             loadQueue(showLoading = false)
-            checkStatus()
         }
     }
 
@@ -311,57 +175,15 @@ class MainViewModel(
 
     fun randomPrompt() {
         viewModelScope.launch {
-            val prompt = repository.randomPrompt()
+            val prompt = promptRepo.randomPrompt()
             updatePrompt(prompt)
         }
     }
 
-
-    //show a timer for the image generation
-    private val _timer = MutableStateFlow("00:00")
-    val timer: StateFlow<String> = _timer
-
-    private var running = false
-    private var elapsedTime = 0L
-
-    private fun startTimer() {
-        if (running) return
-        running = true
-        viewModelScope.launch {
-            while (running) {
-                delay(1000) // Update every second
-                elapsedTime += 1000 // Increment by 1 second
-                _timer.value = formatTime(elapsedTime)
-            }
-        }
-    }
-
-    private fun stopTimer() {
-        running = false
-    }
-
-    private fun resetTimer() {
-        running = false
-        elapsedTime = 0L
-        _timer.value = formatTime(elapsedTime)
-    }
-
     override fun onCleared() {
         super.onCleared()
-        resetTimer()
+        timerUseCase.resetTimer()
     }
-
-    @SuppressLint("DefaultLocale")
-    private fun formatTime(time: Long): String {
-        val minutes = (time / 1000) / 60
-        val seconds = (time / 1000) % 60
-        return String.format("%02d:%02d", minutes, seconds)
-    }
-
-    //settings
-
-    private val appSettings = AppSettings(applicationContext.getSharedPreferences("AppSettingsPrefs", Context.MODE_PRIVATE))
-    private val groqAPI: GroqAPI = GroqAPI(appSettings)
 
     fun updateSystemTheme(system: Boolean) {
         appSettings.setSystemTheme(system)
@@ -379,47 +201,4 @@ class MainViewModel(
         appSettings.setGroqApiKey(key)
     }
 
-    // Observe theme state
-    val settingsState: StateFlow<SettingsState> = appSettings.settingsState
-
-
-
-}
-
-fun Context.getWorkflowAsText(workflow: WorkflowFile) : String? {
-    return try {
-        if (workflow.isAsset) {
-            // Load from assets
-            val fileName = workflow.workflowUri.removePrefix("file:///android_asset/")
-            assets.open(fileName).bufferedReader().use { it.readText() }
-        } else {
-            Log.d("ComfyFlux", "reading file: ${workflow.workflowUri}")
-            val uri = Uri.parse(workflow.workflowUri)
-            contentResolver.openInputStream(uri)?.bufferedReader().use {
-                it?.readText()
-            }
-
-        }
-    } catch (e: Exception) {
-        e.printStackTrace()
-        null
-    }
-}
-
-fun InputStream.readTextAndClose(charset: Charset = Charsets.UTF_8): String {
-    return this.bufferedReader(charset).use { it.readText() }
-}
-
-fun generateRandom16DigitNumber(): Long {
-    val random = Random.nextLong(100000000000000, 999999999999999)
-    return random
-}
-
-fun String.cleanPrompt() : String {
-    return this
-        .replace("\\", "\\\\") // Escape backslashes
-        .replace("\"", "\\\"") // Escape double quotes
-        .replace("\n", "") // Remove newlines
-        .replace("\r", "") // Remove carriage returns
-        .replace("\t", "") // Remove tabs
 }

@@ -12,7 +12,7 @@ fun Project.loadProperties(): Properties? {
         val properties = Properties()
         file("../local.properties").inputStream().use { properties.load(it) }
         properties
-    } catch (e: Exception){
+    } catch (e: Exception) {
         //throw Exception("must be in ci, or you did not setup the local properties")
         null
     }
@@ -50,7 +50,7 @@ android {
             )
             buildConfigField("String", "GROQ_API_KEY", "\"${project.apiKey()}\"")
         }
-        debug{
+        debug {
             buildConfigField("String", "GROQ_API_KEY", "\"${project.apiKey()}\"")
 
         }

@@ -18,7 +18,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
@@ -35,6 +34,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.eltonkola.comfyflux.app.drawer.HistoryAndQueue
+import com.eltonkola.comfyflux.app.model.ImageGenerationUiState
 import com.eltonkola.comfyflux.app.model.ProgressGenerationUIState
 import com.eltonkola.comfyflux.app.prompts.PromptSearch
 import com.eltonkola.comfyflux.ui.theme.Ikona
@@ -119,68 +119,68 @@ fun MainAppScreen(
         },
         floatingActionButton = {
 
-            if(drawerStateLeft.isClosed && drawerStateRight.isClosed && uiState.stats != null ){
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
-            ) {
-
-                FloatingActionButton(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    onClick = {
-                        showBottomSheet = true
-                    },
-                    modifier = Modifier.width(120.dp)
+            if (drawerStateLeft.isClosed && drawerStateRight.isClosed && uiState.stats != null) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
 
-                        Icon(
-                            imageVector = Ikona.History,
-                            contentDescription = "History",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(text = "History")
-
-                    }
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-
-                if (progressUiState.executing) {
-                    ExtendedFloatingActionButton(
-                        containerColor = MaterialTheme.colorScheme.primary,
+                    FloatingActionButton(
+                        containerColor = MaterialTheme.colorScheme.secondary,
                         onClick = {
-                            viewModel.interruptImages()
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Ikona.Stop,
-                            contentDescription = "Stop",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(text = "Stop")
-                    }
-                } else {
-                    ExtendedFloatingActionButton(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        onClick = {
-                            viewModel.generateImages()
-                            keyboardController?.hide()
+                            showBottomSheet = true
                         },
-
+                        modifier = Modifier.width(120.dp)
                     ) {
-                        Icon(
-                            imageVector = Ikona.Create,
-                            contentDescription = "Create",
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(text = "Create")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            Icon(
+                                imageVector = Ikona.History,
+                                contentDescription = "History",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(text = "History")
+
+                        }
+                    }
+                    Spacer(modifier = Modifier.size(8.dp))
+
+                    if (progressUiState.executing) {
+                        ExtendedFloatingActionButton(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            onClick = {
+                                viewModel.interruptImages()
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Ikona.Stop,
+                                contentDescription = "Stop",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(text = "Stop")
+                        }
+                    } else {
+                        ExtendedFloatingActionButton(
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            onClick = {
+                                viewModel.generateImages()
+                                keyboardController?.hide()
+                            },
+
+                            ) {
+                            Icon(
+                                imageVector = Ikona.Create,
+                                contentDescription = "Create",
+                                modifier = Modifier.size(24.dp)
+                            )
+                            Text(text = "Create")
+                        }
                     }
                 }
-            }
 
-         }
+            }
 
         }
     ) { contentPadding ->
@@ -195,7 +195,7 @@ fun MainAppScreen(
                     Column(
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        CreateUi(uiState, progressUiState,  viewModel, navController) {
+                        CreateUi(uiState, progressUiState, viewModel, navController) {
                             scope.launch {
                                 drawerStateLeft.apply {
                                     if (isClosed) open() else close()

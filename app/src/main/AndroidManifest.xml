@@ -3,7 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- we need this to make network calls, in our case your comfyui server and optionally grow -->
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- we need these to read from your sdcard, where you will manually store your workflows -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
